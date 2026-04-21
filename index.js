@@ -23,7 +23,7 @@ app.get('/users', async (req, res) => {
 
 app.get('/votos', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM "TA7E41E2F119CD9D111C0738F2C71BD336467216B"');
+    const result = await pool.query('SELECT * FROM "ta7e41e2f119cd9d111c0738f2c71bd336467216b"');
     res.json(result.rows);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -42,7 +42,7 @@ app.post('/votos', async (req, res) => {
 
   try {
     const query = `
-      INSERT INTO "TA7E41E2F119CD9D111C0738F2C71BD336467216B" (
+      INSERT INTO "ta7e41e2f119cd9d111c0738f2c71bd336467216b" (
         "A89344C9C1C66BB7D5691D88A4B7309499E0324BE",
         "A90457F37945B8DFB83E1B46C6E7E042E02D91984",
         "A790D32AC3577C9048B63B8E56391BD0D63F9ECF4",
