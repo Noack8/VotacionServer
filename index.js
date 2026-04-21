@@ -5,7 +5,154 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 
 app.get('/', (req, res) => {
-  res.send('¡Hola Mundo desde Vercel!');
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Bluey - App de Votaciones</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                background: linear-gradient(135deg, #1e3c72 0%, #2b4c82 100%);
+                font-family: 'Segoe UI', 'Comic Neue', 'Comic Neue', 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
+                min-height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+            }
+            .card {
+                background-color: #f9e7c2;
+                border-radius: 60px 60px 60px 40px;
+                box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+                max-width: 700px;
+                width: 100%;
+                padding: 2rem;
+                text-align: center;
+                border: 5px solid #f4a261;
+                position: relative;
+                transition: transform 0.2s;
+            }
+            .card:hover {
+                transform: scale(1.02);
+            }
+            .bluey-header {
+                background-color: #1e6091;
+                border-radius: 50px;
+                padding: 15px;
+                margin: -40px auto 20px auto;
+                width: fit-content;
+                box-shadow: 0 5px 0 #0d3b54;
+            }
+            .bluey-header h1 {
+                color: #f9e7c2;
+                font-size: 2.2rem;
+                text-shadow: 3px 3px 0 #0d3b54;
+                letter-spacing: 2px;
+            }
+            .paw-icon {
+                font-size: 3rem;
+                margin: 10px 0;
+                display: inline-block;
+                animation: wag 1s infinite alternate;
+            }
+            @keyframes wag {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(15deg); }
+            }
+            .character {
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                margin: 20px 0;
+            }
+            .character span {
+                font-size: 3.5rem;
+                filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2));
+                transition: transform 0.2s;
+            }
+            .character span:hover {
+                transform: translateY(-8px);
+            }
+            .info {
+                background: #e2d5b6;
+                border-radius: 35px;
+                padding: 20px;
+                margin: 25px 0;
+                font-size: 1.2rem;
+                color: #2d3e50;
+                border-left: 10px solid #f4a261;
+            }
+            .btn-votar {
+                background-color: #f4a261;
+                border: none;
+                color: #1e3c72;
+                font-size: 1.5rem;
+                font-weight: bold;
+                padding: 12px 30px;
+                border-radius: 50px;
+                cursor: pointer;
+                transition: all 0.3s;
+                box-shadow: 0 5px 0 #c76e2e;
+                font-family: inherit;
+                margin-top: 10px;
+            }
+            .btn-votar:hover {
+                background-color: #e76f51;
+                transform: translateY(-2px);
+                box-shadow: 0 7px 0 #c76e2e;
+            }
+            footer {
+                margin-top: 30px;
+                font-size: 0.8rem;
+                color: #8b7a5b;
+            }
+            @media (max-width: 500px) {
+                .card { padding: 1.2rem; }
+                .bluey-header h1 { font-size: 1.5rem; }
+                .character span { font-size: 2.5rem; }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <div class="bluey-header">
+                <h1>🐾 BLUEY APP 🐾</h1>
+            </div>
+            <div class="paw-icon">
+                🐕🦴🐾
+            </div>
+            <div class="character">
+                <span>🐕‍🦺 Bluey</span>
+                <span>🦴 Bingo</span>
+                <span>🐶 Bandit</span>
+                <span>🤱 Chilli</span>
+            </div>
+            <div class="info">
+                ✨ ¡Bienvenido a la aventura de votaciones! ✨<br>
+                Aquí puedes registrar tus votos como si jugaras con Bluey y su familia.<br>
+                <strong>Usa el endpoint POST /votos</strong> para enviar tus datos cifrados.
+            </div>
+            <button class="btn-votar" onclick="alert('Para votar, envía una petición POST a /votos con formato JSON. Revisa la documentación. 🐕')">
+                🗳️ ¡Quiero votar!
+            </button>
+            <footer>
+                Hecho con 💙 y mucha diversión al estilo Bluey.
+            </footer>
+        </div>
+        <script>
+            // Un pequeño efecto de sonido imaginario (solo consola)
+            console.log('%c🐶 ¡Wacalo! Has entrado al mundo de Bluey', 'color: #f4a261; font-size: 16px;');
+        </script>
+    </body>
+    </html>
+  `);
 });
 
 app.post('/verificar', async (req, res) => {
