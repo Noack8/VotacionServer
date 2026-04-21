@@ -1,0 +1,2 @@
+Texto plano                                 HASH sha 1
+Votaciones Base de Datos Noack              22F59A4D69DD060051847ACD559822653E363AEB
