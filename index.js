@@ -7,6 +7,20 @@ app.get('/', (req, res) => {
   res.send('¡Hola Mundo desde Vercel!');
 });
 
+// Endpoint de ejemplo para obtener datos
+app.get('/users', async (req, res) => {
+  const client = await pool.connect(); // Obtiene un cliente del pool
+  try {
+    const result = await client.query('SELECT * FROM users');
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error al consultar la base de datos');
+  } finally {
+    client.release(); // ¡IMPORTANTE! Devuelve el cliente al pool
+  }
+});
+
 app.get('/votos', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM "A7E41E2F119CD9D111C0738F2C71BD336467216B"');
