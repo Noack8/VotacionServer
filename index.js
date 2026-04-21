@@ -33,10 +33,10 @@ app.get('/votos', async (req, res) => {
 app.post('/votos', async (req, res) => {
   const { col1, col2, col3, col4, col5, col6, col7 } = req.body;
 
-  // Validar que existan los 7 campos
+  // Validación básica
   if (!col1 || !col2 || !col3 || !col4 || !col5 || !col6 || !col7) {
     return res.status(400).json({ 
-      error: 'Faltan campos. Se requiere: col1, col2, col3, col4, col5, col6, col7' 
+      error: 'Faltan campos: col1, col2, col3, col4, col5, col6, col7' 
     });
   }
 
@@ -53,17 +53,16 @@ app.post('/votos', async (req, res) => {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING id;
     `;
-
     const values = [col1, col2, col3, col4, col5, col6, col7];
     const result = await pool.query(query, values);
-
-    res.status(201).json({
-      message: 'Voto insertado correctamente',
-      id: result.rows[0].id
-    });
+    res.status(201).json({ message: 'Insertado', id: result.rows[0].id });
   } catch (error) {
-    console.error('Error al insertar:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    console.error('ERROR DETALLADO:', error); // ← Esto aparece en los logs de Vercel
+    res.status(500).json({ 
+      error: 'Error en la base de datos', 
+      detalle: error.message,        // ← Ahora verás el mensaje real
+      codigo: error.code 
+    });
   }
 });
 
