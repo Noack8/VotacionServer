@@ -42,7 +42,7 @@ app.post('/votos', async (req, res) => {
 
   try {
     const query = `
-      INSERT INTO "ta7e41e2f119cd9d111c0738f2c71bd336467216b" (
+      INSERT INTO "public"."ta7e41e2f119cd9d111c0738f2c71bd336467216b" (
         "a89344c9c1c66bb7d5691d88a4b7309499e0324be",
         "a90457f37945b8dfb83e1b46c6e7e042e02d91984",
         "a790d32ac3577c9048b63b8e56391bd0d63f9ecf4",
