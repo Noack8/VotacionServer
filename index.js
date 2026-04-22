@@ -34,7 +34,7 @@ app.get('/votos', async (req, res) => {
   }
 });
 
-app.post('/registar-voto', async (req, res) => {
+app.post('/registrar-voto', async (req, res) => {
   const { col1, col2, col3, col4, col5, col6, col7 } = req.body;
     if (!col1 || !col2 || !col3 || !col4 || !col5 || !col6 || !col7) {
     return res.status(400).json({ 
@@ -55,7 +55,7 @@ app.post('/registar-voto', async (req, res) => {
             "a90457f37945b8dfb83e1b46c6e7e042e02d91984",
             "a790d32ac3577c9048b63b8e56391bd0d63f9ecf4",
             "a455ee7b3ef6288a901c9bca7593568c9dd36807a"
-            ) VALUES ($2, $3, $4)
+            ) VALUES ($1, $2, $3)
         `;
         const values = [col2, col3, col4];
         const result1 = await pool.query(query, values);
@@ -75,7 +75,7 @@ app.post('/registar-voto', async (req, res) => {
             "a48a66962617bf51f46a9db9942af639056a5bc17",
             "a79b70b410141467f65c2100cdb656a5cd3b58f53",
             "ab99eb061f4f93aef0d9feaf32f7984afa9dd7c3b"
-        ) VALUES ($1, $5, $6, $7)
+        ) VALUES ($1, $2, $3, $4)
         `;
         const values = [col1, col5, col6, col7];
         const result2 = await pool.query(query, values);
