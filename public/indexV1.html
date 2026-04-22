@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Noack · Votaciones Seguras</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        /* (Mantén todos tus estilos actuales, solo añade los nuevos para las secciones de voto) */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(145deg, #1b4d6e 0%, #2a6f96 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Comic Neue', system-ui, sans-serif;
+            padding: 20px;
+        }
+        .card {
+            max-width: 900px;
+            width: 100%;
+            background: #fef3e2;
+            border-radius: 48px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+            overflow: hidden;
+            animation: fadeSlideUp 0.6s ease-out;
+        }
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .bluey-header {
+            background: #1e6091;
+            padding: 1rem;
+            text-align: center;
+            border-bottom: 5px solid #f4a261;
+        }
+        .bluey-header h1 {
+            color: #FFE8C5;
+            text-shadow: 3px 3px 0 #c16f2e;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .info-text {
+            background: #e2d5b6;
+            border-radius: 30px;
+            padding: 0.8rem;
+            text-align: center;
+            margin-bottom: 1.8rem;
+            font-weight: bold;
+            color: #2d4a6e;
+        }
+        .content {
+            padding: 2rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #1e3c5c;
+        }
+        textarea {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #f4a261;
+            border-radius: 28px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+        }
+        .btn-votar {
+            background-color: #f4a261;
+            border: none;
+            color: #1e3c72;
+            font-size: 1.3rem;
+            font-weight: bold;
+            padding: 14px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 0 #c76e2e;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-votar:hover { background-color: #e76f51; transform: translateY(-2px); box-shadow: 0 7px 0 #c76e2e; }
+        .result {
+            margin-top: 1.8rem;
+            background: #1e3c5c;
+            border-radius: 28px;
+            padding: 1rem;
+            color: #f0e6c5;
+            font-size: 0.85rem;
+            word-break: break-word;
+            display: none;
+        }
+        .result.show { display: block; }
+        .result.success { background: #2a7a3e; border-left: 8px solid #a5e0a5; }
+        .result.error { background: #9e2d2f; border-left: 8px solid #ffb4a2; }
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #1e3c72;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background: #d9cba3;
+            font-size: 0.7rem;
+            color: #5b4b2e;
+        }
+
+        /* Estilos para las secciones de votación */
+        .voting-section {
+            margin-top: 2rem;
+            border-top: 2px solid #f4a261;
+            padding-top: 1.5rem;
+        }
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #1e6091;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .candidates {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .candidate-card {
+            background: white;
+            border-radius: 28px;
+            padding: 1rem;
+            width: 150px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 3px solid transparent;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .candidate-card.selected {
+            border-color: #f4a261;
+            background: #fff0e0;
+            transform: scale(1.02);
+        }
+        .candidate-card img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 0.5rem;
+        }
+        .candidate-name {
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        .finalizar-btn {
+            background-color: #2a7a3e;
+            margin-top: 2rem;
+            box-shadow: 0 5px 0 #1e5a2e;
+        }
+        .finalizar-btn:hover { background-color: #1e5a2e; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="bluey-header">
+        <h1><span>🐾</span> Padron electoral 2026 Noack <span>🦴</span></h1>
+        <div class="info-text">✨ Ingresa tu boleta, se verificará que no hayas votado antes ✨</div>
+    </div>
+    <div class="content">
+        <!-- Paso 1: Ingreso de boleta -->
+        <div id="step1">
+            <div class="form-group">
+                <label>📝 Boleta electoral (10 dígitos con "64" en medio, ej: 2022648923):</label>
+                <textarea id="boletaInput" rows="2" placeholder="Ejemplo: 2022648923"></textarea>
+            </div>
+            <button class="btn-votar" id="enviarBtn">🗳️ Verificar votante en la BD 🔒</button>
+        </div>
+
+        <!-- Paso 2: Interfaz de votación (inicialmente oculta) -->
+        <div id="step2" class="hidden">
+            <div id="votingContainer"></div>
+            <button class="btn-votar finalizar-btn" id="finalizarBtn">✅ Finalizar votación</button>
+        </div>
+
+        <div id="resultArea" class="result"></div>
+    </div>
+    <footer>🔐 Cifrado AES-128-CBC · Voto secreto</footer>
+</div>
+
+<script>
+    // Configuración de cifrado (igual que antes)
+    const SECRET_KEY = "9QtBteWKKZaNFD2S";
+    const INIT_VECTOR = "mAQZptX9oOGIkQHS";
+    const keyWordArray = CryptoJS.enc.Utf8.parse(SECRET_KEY);
+    const ivWordArray = CryptoJS.enc.Utf8.parse(INIT_VECTOR);
+
+    function encryptAES128(plaintext) {
+        const encrypted = CryptoJS.AES.encrypt(plaintext, keyWordArray, {
+            iv: ivWordArray,
+            mode: CryptoJS.mode.CBC,
+            padding: CryptoJS.pad.Pkcs7
+        });
+        return encrypted.toString();
+    }
+
+    // Validación de formato de boleta (10 dígitos, debe contener "64" en las posiciones 5-6)
+    function isValidBoleta(boleta) {
+        return /^\d{4}64\d{4}$/.test(boleta);
+    }
+
+    // Datos de ejemplo para las votaciones (3 secciones, 3 opciones cada una)
+    // Puedes reemplazar las imágenes y nombres con tus candidatos reales
+    const secciones = [
+        {
+            nombre: "Presidente",
+            candidatos: [
+                { id: "pres1", nombre: "Juan Pérez", imagen: "https://via.placeholder.com/100?text=Juan" },
+                { id: "pres2", nombre: "María López", imagen: "https://via.placeholder.com/100?text=Maria" },
+                { id: "pres3", nombre: "Carlos Ruiz", imagen: "https://via.placeholder.com/100?text=Carlos" }
+            ]
+        },
+        {
+            nombre: "Alcalde",
+            candidatos: [
+                { id: "alc1", nombre: "Ana Gómez", imagen: "https://via.placeholder.com/100?text=Ana" },
+                { id: "alc2", nombre: "Luis Fernández", imagen: "https://via.placeholder.com/100?text=Luis" },
+                { id: "alc3", nombre: "Sofía Martínez", imagen: "https://via.placeholder.com/100?text=Sofia" }
+            ]
+        },
+        {
+            nombre: "Diputado",
+            candidatos: [
+                { id: "dip1", nombre: "Pedro Rojas", imagen: "https://via.placeholder.com/100?text=Pedro" },
+                { id: "dip2", nombre: "Laura Silva", imagen: "https://via.placeholder.com/100?text=Laura" },
+                { id: "dip3", nombre: "Diego Castro", imagen: "https://via.placeholder.com/100?text=Diego" }
+            ]
+        }
+    ];
+
+    let boletaCifradaGlobal = "";
+    let selecciones = {};
+
+    // Renderizar las opciones de votación
+    function renderVotingUI() {
+        const container = document.getElementById("votingContainer");
+        container.innerHTML = "";
+        selecciones = {};
+
+        secciones.forEach((seccion, idx) => {
+            const sectionDiv = document.createElement("div");
+            sectionDiv.className = "voting-section";
+            sectionDiv.innerHTML = `<div class="section-title">${seccion.nombre}</div>`;
+            const candidatesDiv = document.createElement("div");
+            candidatesDiv.className = "candidates";
+            
+            seccion.candidatos.forEach(cand => {
+                const card = document.createElement("div");
+                card.className = "candidate-card";
+                card.dataset.seccion = idx;
+                card.dataset.candidatoId = cand.id;
+                card.innerHTML = `
+                    <img src="${cand.imagen}" alt="${cand.nombre}" onerror="this.src='https://via.placeholder.com/100'">
+                    <div class="candidate-name">${cand.nombre}</div>
+                `;
+                card.addEventListener("click", () => {
+                    // Toggle: remover selected de otros en la misma sección
+                    document.querySelectorAll(`.candidate-card[data-seccion='${idx}']`).forEach(c => c.classList.remove("selected"));
+                    card.classList.add("selected");
+                    selecciones[idx] = cand.id;
+                });
+                candidatesDiv.appendChild(card);
+            });
+            sectionDiv.appendChild(candidatesDiv);
+            container.appendChild(sectionDiv);
+        });
+    }
+
+    // Mostrar mensajes
+    function mostrarResultado(mensaje, tipo = 'success') {
+        const resultArea = document.getElementById("resultArea");
+        resultArea.innerHTML = mensaje;
+        resultArea.classList.add("show", tipo);
+        resultArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Ocultar resultado
+    function ocultarResultado() {
+        const resultArea = document.getElementById("resultArea");
+        resultArea.classList.remove("show", "success", "error");
+        resultArea.innerHTML = "";
+    }
+
+    // Evento principal: verificar boleta
+    document.getElementById("enviarBtn").addEventListener("click", async () => {
+        ocultarResultado();
+        const boletaPlana = document.getElementById("boletaInput").value.trim();
+
+        // Validación de formato
+        if (!isValidBoleta(boletaPlana)) {
+            mostrarResultado("❌ Formato de boleta inválido. Debe ser 10 dígitos con '64' en medio (ej: 2022648923).", "error");
+            return;
+        }
+
+        // Cifrar la boleta
+        const boletaCifrada = encryptAES128(boletaPlana);
+        boletaCifradaGlobal = boletaCifrada;
+
+        // Deshabilitar botón mientras se verifica
+        const btn = document.getElementById("enviarBtn");
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner"></span> Verificando...';
+        btn.disabled = true;
+
+        try {
+            const response = await fetch('/verificar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ votante: boletaCifrada })
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                if (data.mensaje === "Votante no encontrado puede votar") {
+                    // Mostrar interfaz de votación
+                    document.getElementById("step1").classList.add("hidden");
+                    document.getElementById("step2").classList.remove("hidden");
+                    renderVotingUI();
+                    mostrarResultado("✅ Boleta válida. Ahora puedes seleccionar tus candidatos.", "success");
+                } else if (data.mensaje === "Votante encontrado, solo se puede votar una sola vez") {
+                    mostrarResultado("❌ Este votante ya ha emitido su voto. No se puede votar nuevamente.", "error");
+                } else {
+                    mostrarResultado("⚠️ Respuesta inesperada del servidor.", "error");
+                }
+            } else {
+                mostrarResultado(`❌ Error del servidor: ${data.error || "Desconocido"}`, "error");
+            }
+        } catch (err) {
+            mostrarResultado(`❌ Error de conexión: ${err.message}`, "error");
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    });
+
+    // Evento Finalizar votación
+    document.getElementById("finalizarBtn").addEventListener("click", async () => {
+        // Verificar que se haya elegido una opción por cada sección
+        const seccionesCount = secciones.length;
+        let faltantes = [];
+        for (let i = 0; i < seccionesCount; i++) {
+            if (!selecciones[i]) faltantes.push(secciones[i].nombre);
+        }
+        if (faltantes.length > 0) {
+            mostrarResultado(`❌ Debes seleccionar un candidato en: ${faltantes.join(", ")}`, "error");
+            return;
+        }
+
+        // Preparar payload
+        const payload = {
+            boleta: boletaCifradaGlobal,
+            votos: {
+                presidente: selecciones[0],
+                alcalde: selecciones[1],
+                diputado: selecciones[2]
+            }
+        };
+
+        const btn = document.getElementById("finalizarBtn");
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner"></span> Registrando voto...';
+        btn.disabled = true;
+
+        try {
+            const response = await fetch('/registrar-voto', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            if (response.ok) {
+                mostrarResultado("✅ ¡Voto registrado exitosamente! Gracias por participar.", "success");
+                // Reiniciar la interfaz después de unos segundos
+                setTimeout(() => {
+                    document.getElementById("step2").classList.add("hidden");
+                    document.getElementById("step1").classList.remove("hidden");
+                    document.getElementById("boletaInput").value = "";
+                    ocultarResultado();
+                }, 3000);
+            } else {
+                mostrarResultado(`❌ Error al registrar voto: ${data.error || "Intente más tarde"}`, "error");
+            }
+        } catch (err) {
+            mostrarResultado(`❌ Error de conexión: ${err.message}`, "error");
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>

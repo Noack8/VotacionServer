@@ -7,7 +7,7 @@ app.use(express.static('public'));
 const path = require('path');
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'indexV1.html'));
 });
 
 app.post('/verificar', async (req, res) => {
