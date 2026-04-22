@@ -312,10 +312,10 @@
         const boletaPlana = document.getElementById("boletaInput").value.trim();
 
         // Validación de formato
-        if (!isValidBoleta(boletaPlana)) {
+        /*if (!isValidBoleta(boletaPlana)) {
             mostrarResultado("❌ Formato de boleta inválido. Debe ser 10 dígitos con '64' en medio (ej: 2022648923).", "error");
             return;
-        }
+        }*/
 
         // Calcular SHA256 de (boleta + "boleta Sistema de votaciones 2026")
         const textoConstante = "boleta Sistema de votaciones 2026";
