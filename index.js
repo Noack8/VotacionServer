@@ -11,7 +11,7 @@ app.get('/', (req, res) => {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Bluey - App de Votaciones</title>
+        <title>Bluey · Votaciones</title>
         <style>
             * {
                 margin: 0;
@@ -19,137 +19,91 @@ app.get('/', (req, res) => {
                 box-sizing: border-box;
             }
             body {
-                background: linear-gradient(135deg, #1e3c72 0%, #2b4c82 100%);
-                font-family: 'Segoe UI', 'Comic Neue', 'Comic Neue', 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
+                background: linear-gradient(145deg, #1b4d6e 0%, #2a6f96 100%);
                 min-height: 100vh;
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                padding: 20px;
+                font-family: 'Segoe UI', 'Comic Neue', system-ui, sans-serif;
             }
-            .card {
-                background-color: #f9e7c2;
-                border-radius: 60px 60px 60px 40px;
-                box-shadow: 0 20px 35px rgba(0,0,0,0.2);
-                max-width: 700px;
-                width: 100%;
-                padding: 2rem;
+            .container {
                 text-align: center;
-                border: 5px solid #f4a261;
-                position: relative;
-                transition: transform 0.2s;
+                animation: fadeIn 1.2s ease-out;
             }
-            .card:hover {
-                transform: scale(1.02);
-            }
-            .bluey-header {
-                background-color: #1e6091;
-                border-radius: 50px;
-                padding: 15px;
-                margin: -40px auto 20px auto;
-                width: fit-content;
-                box-shadow: 0 5px 0 #0d3b54;
-            }
-            .bluey-header h1 {
-                color: #f9e7c2;
-                font-size: 2.2rem;
-                text-shadow: 3px 3px 0 #0d3b54;
-                letter-spacing: 2px;
-            }
-            .paw-icon {
-                font-size: 3rem;
-                margin: 10px 0;
+            .bluey-icon {
+                font-size: 6rem;
                 display: inline-block;
-                animation: wag 1s infinite alternate;
+                animation: bounce 2s infinite ease;
+                filter: drop-shadow(0 10px 8px rgba(0,0,0,0.2));
+                margin-bottom: 1rem;
             }
-            @keyframes wag {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(15deg); }
+            .title {
+                color: #FFE8C5;
+                text-shadow: 4px 4px 0 #C16F2E;
+                font-size: 2.5rem;
+                letter-spacing: 2px;
+                margin-bottom: 0.5rem;
             }
-            .character {
-                display: flex;
-                justify-content: center;
-                gap: 15px;
-                margin: 20px 0;
-            }
-            .character span {
-                font-size: 3.5rem;
-                filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2));
-                transition: transform 0.2s;
-            }
-            .character span:hover {
-                transform: translateY(-8px);
-            }
-            .info {
-                background: #e2d5b6;
-                border-radius: 35px;
-                padding: 20px;
-                margin: 25px 0;
+            .sub {
+                color: #f9e0a8;
                 font-size: 1.2rem;
-                color: #2d3e50;
-                border-left: 10px solid #f4a261;
+                background: rgba(0,0,0,0.2);
+                display: inline-block;
+                padding: 0.5rem 1.2rem;
+                border-radius: 60px;
+                backdrop-filter: blur(4px);
             }
-            .btn-votar {
-                background-color: #f4a261;
-                border: none;
-                color: #1e3c72;
-                font-size: 1.5rem;
-                font-weight: bold;
-                padding: 12px 30px;
-                border-radius: 50px;
-                cursor: pointer;
-                transition: all 0.3s;
-                box-shadow: 0 5px 0 #c76e2e;
-                font-family: inherit;
-                margin-top: 10px;
+            .pulse-ring {
+                margin-top: 2rem;
+                width: 80px;
+                height: 80px;
+                background: #f4a261;
+                border-radius: 50%;
+                margin-left: auto;
+                margin-right: auto;
+                animation: pulse 1.8s infinite;
+                box-shadow: 0 0 0 0 #f4a261;
             }
-            .btn-votar:hover {
-                background-color: #e76f51;
-                transform: translateY(-2px);
-                box-shadow: 0 7px 0 #c76e2e;
+            @keyframes bounce {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-20px); }
+            }
+            @keyframes pulse {
+                0% {
+                    transform: scale(0.9);
+                    box-shadow: 0 0 0 0 rgba(244,162,97,0.7);
+                }
+                70% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 20px rgba(244,162,97,0);
+                }
+                100% {
+                    transform: scale(0.9);
+                    box-shadow: 0 0 0 0 rgba(244,162,97,0);
+                }
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
             }
             footer {
-                margin-top: 30px;
-                font-size: 0.8rem;
-                color: #8b7a5b;
-            }
-            @media (max-width: 500px) {
-                .card { padding: 1.2rem; }
-                .bluey-header h1 { font-size: 1.5rem; }
-                .character span { font-size: 2.5rem; }
+                position: fixed;
+                bottom: 16px;
+                width: 100%;
+                text-align: center;
+                color: #cfe6f0;
+                font-size: 0.75rem;
             }
         </style>
     </head>
     <body>
-        <div class="card">
-            <div class="bluey-header">
-                <h1>🐾 BLUEY APP 🐾</h1>
-            </div>
-            <div class="paw-icon">
-                🐕🦴🐾
-            </div>
-            <div class="character">
-                <span>🐕‍🦺 Bluey</span>
-                <span>🦴 Bingo</span>
-                <span>🐶 Bandit</span>
-                <span>🤱 Chilli</span>
-            </div>
-            <div class="info">
-                ✨ ¡Bienvenido a la aventura de votaciones! ✨<br>
-                Aquí puedes registrar tus votos como si jugaras con Bluey y su familia.<br>
-                <strong>Usa el endpoint POST /votos</strong> para enviar tus datos cifrados.
-            </div>
-            <button class="btn-votar" onclick="alert('Para votar, envía una petición POST a /votos con formato JSON. Revisa la documentación. 🐕')">
-                🗳️ ¡Quiero votar!
-            </button>
-            <footer>
-                Hecho con 💙 y mucha diversión al estilo Bluey.
-            </footer>
+        <div class="container">
+            <div class="bluey-icon">🐕‍🦺✨</div>
+            <h1 class="title">Bluey Vota</h1>
+            <div class="sub">Sistema de votación cifrada</div>
+            <div class="pulse-ring"></div>
         </div>
-        <script>
-            // Un pequeño efecto de sonido imaginario (solo consola)
-            console.log('%c🐶 ¡Wacalo! Has entrado al mundo de Bluey', 'color: #f4a261; font-size: 16px;');
-        </script>
+        <footer>🐾 haz tu voto con POST /votos</footer>
     </body>
     </html>
   `);
