@@ -13,7 +13,7 @@ app.get('/', (req, res) => {
 app.post('/verificar', async (req, res) => {
   const { votante } = req.body;
   try {
-    const result = await pool.query('SELECT * FROM "ta7e41e2f119cd9d111c0738f2c71bd336467216b" WHERE "a89344c9c1c66bb7d5691d88a4b7309499e0324be" = $1', [votante]);
+    const result = await pool.query('SELECT * FROM "t89344c9c1c66bb7d5691d88a4b7309499e0324be" WHERE "a439145df693732a7d4567e33720a90124508ecdb" = $1', [votante]);
     if (result.rows.length === 0) {
         return res.status(200).json({ mensaje: 'Votante no encontrado puede votar' });
     }
@@ -25,14 +25,14 @@ app.post('/verificar', async (req, res) => {
   }
 });
 
-app.get('/votos', async (req, res) => {
+/*app.get('/votos', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM "ta7e41e2f119cd9d111c0738f2c71bd336467216b"');
     res.json(result.rows);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+});*/
 
 app.post('/registrar-voto', async (req, res) => {
   const { col1, col2, col3, col4, col5, col6, col7 } = req.body;
@@ -83,7 +83,7 @@ app.post('/registrar-voto', async (req, res) => {
 });
 
 
-app.post('/votos', async (req, res) => {
+/*app.post('/votos', async (req, res) => {
   const { col1, col2, col3, col4, col5, col6, col7 } = req.body;
 
   if (!col1 || !col2 || !col3 || !col4 || !col5 || !col6 || !col7) {
@@ -116,7 +116,7 @@ app.post('/votos', async (req, res) => {
       codigo: error.code 
     });
   }
-});
+});*/
 
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);
