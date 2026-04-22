@@ -343,7 +343,7 @@
                     document.getElementById("step1").classList.add("hidden");
                     document.getElementById("step2").classList.remove("hidden");
                     renderVotingUI();
-                    mostrarResultado("✅ Boleta válida (hash verificado). Ahora puedes seleccionar tus candidatos.", "success");
+                    mostrarResultado("✅ Boleta válida (hash verificado). Ahora puedes seleccionar tus candidatos.", "success",identificadorHashGlobal);
                 } else if (data.mensaje === "Votante encontrado, solo se puede votar una sola vez") {
                     mostrarResultado("❌ Este votante ya ha emitido su voto (hash ya registrado). No se puede votar nuevamente.", "error");
                 } else {
