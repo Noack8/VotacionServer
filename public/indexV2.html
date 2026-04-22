@@ -318,7 +318,7 @@
         }*/
 
         // Calcular SHA256 de (boleta + "boleta Sistema de votaciones 2026")
-        const textoConstante = "boleta Sistema de votaciones 2026";
+        const textoConstante = " Sistema de votaciones 2026";
         const concatenado = boletaPlana + textoConstante;
         const hashSha256 = CryptoJS.SHA256(concatenado).toString();
         identificadorHashGlobal = hashSha256;
