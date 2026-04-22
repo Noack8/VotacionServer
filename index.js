@@ -3,110 +3,11 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
 app.use(express.json());
+app.use(express.static('public'));
+const path = require('path');
 
 app.get('/', (req, res) => {
-  res.send(`
-    <!DOCTYPE html>
-    <html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Bluey · Votaciones</title>
-        <style>
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }
-            body {
-                background: linear-gradient(145deg, #1b4d6e 0%, #2a6f96 100%);
-                min-height: 100vh;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                font-family: 'Segoe UI', 'Comic Neue', system-ui, sans-serif;
-            }
-            .container {
-                text-align: center;
-                animation: fadeIn 1.2s ease-out;
-            }
-            .bluey-icon {
-                font-size: 6rem;
-                display: inline-block;
-                animation: bounce 2s infinite ease;
-                filter: drop-shadow(0 10px 8px rgba(0,0,0,0.2));
-                margin-bottom: 1rem;
-            }
-            .title {
-                color: #FFE8C5;
-                text-shadow: 4px 4px 0 #C16F2E;
-                font-size: 2.5rem;
-                letter-spacing: 2px;
-                margin-bottom: 0.5rem;
-            }
-            .sub {
-                color: #f9e0a8;
-                font-size: 1.2rem;
-                background: rgba(0,0,0,0.2);
-                display: inline-block;
-                padding: 0.5rem 1.2rem;
-                border-radius: 60px;
-                backdrop-filter: blur(4px);
-            }
-            .pulse-ring {
-                margin-top: 2rem;
-                width: 80px;
-                height: 80px;
-                background: #f4a261;
-                border-radius: 50%;
-                margin-left: auto;
-                margin-right: auto;
-                animation: pulse 1.8s infinite;
-                box-shadow: 0 0 0 0 #f4a261;
-            }
-            @keyframes bounce {
-                0%, 100% { transform: translateY(0); }
-                50% { transform: translateY(-20px); }
-            }
-            @keyframes pulse {
-                0% {
-                    transform: scale(0.9);
-                    box-shadow: 0 0 0 0 rgba(244,162,97,0.7);
-                }
-                70% {
-                    transform: scale(1);
-                    box-shadow: 0 0 0 20px rgba(244,162,97,0);
-                }
-                100% {
-                    transform: scale(0.9);
-                    box-shadow: 0 0 0 0 rgba(244,162,97,0);
-                }
-            }
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(20px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-            footer {
-                position: fixed;
-                bottom: 16px;
-                width: 100%;
-                text-align: center;
-                color: #cfe6f0;
-                font-size: 0.75rem;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="bluey-icon">🐕‍🦺✨</div>
-            <h1 class="title">Bluey Vota</h1>
-            <div class="sub">Sistema de votación cifrada</div>
-            <div class="pulse-ring"></div>
-        </div>
-        <footer>🐾 haz tu voto con POST /votos</footer>
-    </body>
-    </html>
-  `);
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.post('/verificar', async (req, res) => {
