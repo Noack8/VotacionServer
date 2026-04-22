@@ -34,6 +34,68 @@ app.get('/votos', async (req, res) => {
   }
 });
 
+app.post('/registar-voto', async (req, res) => {
+  const { col1, col2, col3, col4, col5, col6, col7 } = req.body;
+    if (!col1 || !col2 || !col3 || !col4 || !col5 || !col6 || !col7) {
+    return res.status(400).json({ 
+      error: 'Faltan campos: col1, col2, col3, col4, col5, col6, col7' 
+    });
+  }
+  // Se insertan los valores en dos tablas distintas, 
+  // la primera tabla es para la firma del votante y su trayectoria
+  // se hace con un blockchain simple cada columna es un HASH de que 
+  // ruta hizo el votante para realizar su tramite
+  // la segunda tabla es para registrar el voto en si, 
+  // con los datos del voto solamente, esta informacion si va cifrada
+  // con un cifrado simetrico AES-256-CBC. 
+
+    try {
+        const query = `
+        INSERT INTO "public"."ta7e41e2f119cd9d111c0738f2c71bd336467216b" (
+            "a90457f37945b8dfb83e1b46c6e7e042e02d91984",
+            "a790d32ac3577c9048b63b8e56391bd0d63f9ecf4",
+            "a455ee7b3ef6288a901c9bca7593568c9dd36807a"
+            ) VALUES ($2, $3, $4)
+        `;
+        const values = [col2, col3, col4];
+        const result1 = await pool.query(query, values);
+    } catch (error) {
+        console.error('ERROR DETALLADO:', error); 
+        return res.status(500).json({
+            error: 'Error en la base de datos',
+            detalle: error.message,
+            codigo: error.code
+        });
+    }
+
+    try {
+        const query = `
+        INSERT INTO "public"."t89344c9c1c66bb7d5691d88a4b7309499e0324be" (
+            "a439145df693732a7d4567e33720a90124508ecdb",
+            "a48a66962617bf51f46a9db9942af639056a5bc17",
+            "a79b70b410141467f65c2100cdb656a5cd3b58f53",
+            "ab99eb061f4f93aef0d9feaf32f7984afa9dd7c3b"
+        ) VALUES ($1, $5, $6, $7)
+        `;
+        const values = [col1, col5, col6, col7];
+        const result2 = await pool.query(query, values);
+    } catch (error) {
+        console.error('ERROR DETALLADO:', error); 
+        res.status(500).json({
+        error: 'Error en la base de datos', 
+        detalle: error.message,  
+        codigo: error.code 
+        });
+    }
+
+    if (result1 && result2) {
+        res.status(201).json({ message: 'Insertado correctamente' });
+    } else {
+        res.status(500).json({ error: 'Error al insertar el voto' });
+    }
+});
+
+
 app.post('/votos', async (req, res) => {
   const { col1, col2, col3, col4, col5, col6, col7 } = req.body;
 
