@@ -189,9 +189,9 @@
         <div id="step1">
             <div class="form-group">
                 <label>📝 Boleta electoral:</label>
-                <textarea id="boletaInput" rows="2" placeholder="Escribe aquí tu boleta (10 dígitos con '64' en medio)"></textarea>
+                <textarea id="boletaInput" rows="2" placeholder="Escribe aquí tu boleta"></textarea>
             </div>
-            <button class="btn-votar" id="enviarBtn">🗳️ Verificar votante (Hash SHA256) 🔒</button>
+            <button class="btn-votar" id="enviarBtn">🗳️ Verificar votante 🔒</button>
         </div>
 
         <!-- Paso 2: Interfaz de votación (inicialmente oculta) -->
@@ -202,7 +202,7 @@
 
         <div id="resultArea" class="result"></div>
     </div>
-    <footer>🔐 Verificación con SHA256 · Voto secreto</footer>
+    <footer>🔐 Cifrado AES-128-CBC · Voto secretoo</footer>
 </div>
 
 <script>
@@ -343,9 +343,9 @@
                     document.getElementById("step1").classList.add("hidden");
                     document.getElementById("step2").classList.remove("hidden");
                     renderVotingUI();
-                    mostrarResultado("✅ Boleta válida (hash verificado). Ahora puedes seleccionar tus candidatos.", "success");
+                    mostrarResultado("✅ Boleta válida. Ahora puedes seleccionar tus candidatos.", "success");
                 } else if (data.mensaje === "Votante encontrado, solo se puede votar una sola vez") {
-                    mostrarResultado("❌ Este votante ya ha emitido su voto (hash ya registrado). No se puede votar nuevamente.", "error");
+                    mostrarResultado("❌ Este votante ya ha emitido su voto. No se puede votar nuevamente.", "error");
                 } else {
                     mostrarResultado("⚠️ Respuesta inesperada del servidor.", "error");
                 }
