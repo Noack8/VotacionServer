@@ -67,7 +67,7 @@ app.post('/registrar-voto', async (req, res) => {
             codigo: error.code
         });
     }
-
+    /*
     try {
         const query = `
         INSERT INTO "public"."t89344c9c1c66bb7d5691d88a4b7309499e0324be" (
@@ -87,8 +87,8 @@ app.post('/registrar-voto', async (req, res) => {
         codigo: error.code 
         });
     }
-
-    if (result1 && result2) {
+*/
+    if (result1) {
         res.status(201).json({ message: 'Insertado correctamente' });
     } else {
         res.status(500).json({ error: 'Error al insertar el voto' });
