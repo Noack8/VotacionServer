@@ -50,26 +50,17 @@ app.post('/registrar-voto', async (req, res) => {
   // con un cifrado simetrico AES-256-CBC. 
 
     try {
-        const query = `
+        const query1 = `
         INSERT INTO "public"."ta7e41e2f119cd9d111c0738f2c71bd336467216b" (
             "a90457f37945b8dfb83e1b46c6e7e042e02d91984",
             "a790d32ac3577c9048b63b8e56391bd0d63f9ecf4",
             "a455ee7b3ef6288a901c9bca7593568c9dd36807a"
             ) VALUES ($1, $2, $3)
         `;
-        const values = [col2, col3, col4];
-        const result1 = await pool.query(query, values);
-    } catch (error) {
-        console.error('ERROR DETALLADO:', error); 
-        return res.status(500).json({
-            error: 'Error en la base de datos',
-            detalle: error.message,
-            codigo: error.code
-        });
-    }
-    
-    try {
-        const query = `
+        const values1 = [col2, col3, col4];
+        const result1 = await pool.query(query1, values1);
+
+        const query2 = `
         INSERT INTO "public"."t89344c9c1c66bb7d5691d88a4b7309499e0324be" (
             "a439145df693732a7d4567e33720a90124508ecdb",
             "a48a66962617bf51f46a9db9942af639056a5bc17",
@@ -77,21 +68,17 @@ app.post('/registrar-voto', async (req, res) => {
             "ab99eb061f4f93aef0d9feaf32f7984afa9dd7c3b"
         ) VALUES ($1, $2, $3, $4)
         `;
-        const values = [col1, col5, col6, col7];
-        const result2 = await pool.query(query, values);
+        const values2 = [col1, col5, col6, col7];
+        const result2 = await pool.query(query2, values2);
+        
+        res.status(201).json({ message: 'Voto registrado exitosamente' });
     } catch (error) {
         console.error('ERROR DETALLADO:', error); 
-        res.status(500).json({
-        error: 'Error en la base de datos', 
-        detalle: error.message,  
-        codigo: error.code 
+        return res.status(500).json({
+            error: 'Error en la base de datos',
+            detalle: error.message,
+            codigo: error.code
         });
-    }
-
-    if (result1.rowCount > 0 && result2.rowCount > 0) {
-        res.status(201).json({ message: 'Insertado correctamente' });
-    } else {
-        res.status(500).json({ error: 'Error al insertar el voto' });
     }
 });
 
