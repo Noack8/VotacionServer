@@ -315,7 +315,7 @@
                 body: JSON.stringify(payload)
             });
 
-            // 4) Procesar la respuesta del servidor (asumimos JSON)
+            // 4) Procesar la respuesta del servidor (JSON)
             let responseData;
             const contentType = response.headers.get('content-type');
             if (contentType && contentType.includes('application/json')) {
