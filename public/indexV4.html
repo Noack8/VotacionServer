@@ -406,7 +406,7 @@
 
         // 2. Construir la cadena con la palabra "urna" y el número de urna
         // Formato: "identificador urna <numUrna> <numAleatorio>" (con espacios)
-        const cadenaParaHash = `${identificadorHashGlobal} urna ${urna}`;
+        const cadenaParaHash = `${Chain1} urna ${urna}`;
         const Chain2 = CryptoJS.SHA256(cadenaParaHash).toString();
 
         // 3. Construir el payload (col1 = identificador, col5 = nuevoHash)
@@ -424,10 +424,9 @@
 
         // Información adicional para depuración
         const infoExtra = `
-            <strong>🔍 Detalles de la generación (con palabra "urna"):</strong><br>
+            <strong>🔍 Detalles de la generación:</strong><br>
             • IdentificadorHashGlobal: <code>${identificadorHashGlobal}</code><br>
             • Urna elegida: <strong>${urna}</strong><br>
-            • Cadena concatenada para hash: <code>${escapeHtml(cadenaParaHash)}</code><br>
             • Cadena hash 1 (col5): <code>${Chain1}</code><br>
             • Cadena hash 2 (col6): <code>${Chain2}</code><br>
             • Voto para diputado: <code>${selecciones[2]}</code><br>
