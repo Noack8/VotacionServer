@@ -401,22 +401,25 @@
         const cadenaUsuario = `${identificadorHashGlobal} Noack`;
         const Chain1 = CryptoJS.SHA256(cadenaUsuario).toString();
 
-        // 1. Generar urna aleatoria entre 1 y 3
-        const urna = Math.floor(Math.random() * 3) + 1;  // 1, 2 o 3
-
-        // 2. Construir la cadena con la palabra "urna" y el número de urna
+        // 3. Construir la cadena con la palabra "urna" y el número de urna
         // Formato: "identificador urna <numUrna> <numAleatorio>" (con espacios)
+        const urna = Math.floor(Math.random() * 3) + 1;  // 1, 2 o 3
         const cadenaParaHash = `${Chain1} urna ${urna}`;
         const Chain2 = CryptoJS.SHA256(cadenaParaHash).toString();
 
-        // 3. Construir el payload (col1 = identificador, col5 = nuevoHash)
+        // 4. Eligir la base de datos donde se guardará el voto (simulado con el número de urna)
+        const bd = Math.floor(Math.random() * 3) + 1;  //1, 2 o 3
+        const cadenaBaseDatos = `${Chain2} BD ${bd}`;
+        const Chain3 = CryptoJS.SHA256(cadenaBaseDatos).toString();
+
+        // 4. Construir el payload (col1 = identificador, col5 = nuevoHash)
         const col1 = identificadorHashGlobal;
         const col2 = CryptoJS.SHA256("traza_paso1_" + identificadorHashGlobal).toString();
         const col3 = CryptoJS.SHA256("traza_paso2_" + identificadorHashGlobal).toString();
         const col4 = CryptoJS.SHA256("traza_paso3_" + identificadorHashGlobal).toString();
         const col5 = Chain1;        // Hash con la palabra "Noack" y el identificador
         const col6 = Chain2;        // Hash con la palabra "urna" y número de urna
-        const col7 = selecciones[2];   // diputado
+        const col7 = Chain3;        // base de datos elegida
 
         const payload = {
             col1, col2, col3, col4, col5, col6, col7
@@ -427,9 +430,10 @@
             <strong>🔍 Detalles de la generación:</strong><br>
             • IdentificadorHashGlobal: <code>${identificadorHashGlobal}</code><br>
             • Urna elegida: <strong>${urna}</strong><br>
+            • Base de datos elegida: <strong>${bd}</strong><br>
             • Cadena hash 1 (col5): <code>${Chain1}</code><br>
             • Cadena hash 2 (col6): <code>${Chain2}</code><br>
-            • Voto para diputado: <code>${selecciones[2]}</code><br>
+            • Cadena hash 3 (col7): <code>${Chain3}</code><br>
         `;
 
         const prettyJson = JSON.stringify(payload, null, 2);
