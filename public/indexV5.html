@@ -230,7 +230,7 @@
 
         <div id="resultArea" class="result"></div>
     </div>
-    <footer>🔐 Verificación con SHA256 · col2, col3, col4 cifrados con AES-128-CBC</footer>
+    <footer>🔐 Verificación SHA256 · Votos cifrados AES-128-CBC (col2, col3, col4)</footer>
 </div>
 
 <script>
@@ -283,13 +283,15 @@
     ];
 
     let identificadorHashGlobal = "";     // Almacena el hash SHA256 de boleta + texto fijo
-    let selecciones = {};
+    let selecciones = {};                 // Guarda los IDs seleccionados (pres1, alc2, etc.)
+    let nombresSeleccionados = {};        // Guarda los nombres reales de los candidatos
 
     // Renderizar las opciones de votación
     function renderVotingUI() {
         const container = document.getElementById("votingContainer");
         container.innerHTML = "";
         selecciones = {};
+        nombresSeleccionados = {};
 
         secciones.forEach((seccion, idx) => {
             const sectionDiv = document.createElement("div");
@@ -303,6 +305,7 @@
                 card.className = "candidate-card";
                 card.dataset.seccion = idx;
                 card.dataset.candidatoId = cand.id;
+                card.dataset.candidatoNombre = cand.nombre;
                 card.innerHTML = `
                     <img src="${cand.imagen}" alt="${cand.nombre}" onerror="this.src='https://via.placeholder.com/100'">
                     <div class="candidate-name">${cand.nombre}</div>
@@ -311,6 +314,7 @@
                     document.querySelectorAll(`.candidate-card[data-seccion='${idx}']`).forEach(c => c.classList.remove("selected"));
                     card.classList.add("selected");
                     selecciones[idx] = cand.id;
+                    nombresSeleccionados[idx] = cand.nombre;   // Guardamos el nombre real
                 });
                 candidatesDiv.appendChild(card);
             });
@@ -384,7 +388,7 @@
         }
     });
 
-    // --- Evento Finalizar votación: MODO DEBUG con generación de urna y palabra "urna" en la cadena hasheada ---
+    // --- Evento Finalizar votación: MODO DEBUG ---
     document.getElementById("finalizarBtn").addEventListener("click", async () => {
         // Verificar que se haya elegido una opción por cada sección
         const seccionesCount = secciones.length;
@@ -397,28 +401,34 @@
             return;
         }
 
-        // 1. Hash con "Noack"
+        // 1. Hash con "Noack" (col5)
         const cadenaUsuario = `${identificadorHashGlobal} Noack`;
         const Chain1 = CryptoJS.SHA256(cadenaUsuario).toString();
 
-        // 2. Urna aleatoria y hash con palabra "urna"
-        const urna = Math.floor(Math.random() * 3) + 1;  // 1, 2 o 3
+        // 2. Urna aleatoria y hash con palabra "urna" (col6)
+        const urna = Math.floor(Math.random() * 3) + 1;
         const cadenaParaHash = `${Chain1} urna ${urna}`;
         const Chain2 = CryptoJS.SHA256(cadenaParaHash).toString();
 
-        // 3. Base de datos aleatoria y hash con "BD"
-        const bd = Math.floor(Math.random() * 3) + 1;  //1, 2 o 3
+        // 3. Base de datos aleatoria y hash con "BD" (col7)
+        const bd = Math.floor(Math.random() * 3) + 1;
         const cadenaBaseDatos = `${Chain2} BD ${bd}`;
         const Chain3 = CryptoJS.SHA256(cadenaBaseDatos).toString();
 
-        // --- col2, col3, col4: ahora se cifran con AES-128-CBC en lugar de SHA256 ---
+        // --- Votos cifrados (solo el nombre del candidato) para col2, col3, col4 ---
+        const nombrePresidente = nombresSeleccionados[0];
+        const nombreAlcalde = nombresSeleccionados[1];
+        const nombreDiputado = nombresSeleccionados[2];
+
+        const col2 = encryptAES128(nombrePresidente);
+        const col3 = encryptAES128(nombreAlcalde);
+        const col4 = encryptAES128(nombreDiputado);
+
+        // col1 es el identificador hash del votante
         const col1 = identificadorHashGlobal;
-        const col2 = encryptAES128("traza_paso1_" + identificadorHashGlobal);
-        const col3 = encryptAES128("traza_paso2_" + identificadorHashGlobal);
-        const col4 = encryptAES128("traza_paso3_" + identificadorHashGlobal);
-        const col5 = Chain1;        // Hash con "Noack"
-        const col6 = Chain2;        // Hash con "urna"
-        const col7 = Chain3;        // Hash con "BD"
+        const col5 = Chain1;
+        const col6 = Chain2;
+        const col7 = Chain3;
 
         const payload = {
             col1, col2, col3, col4, col5, col6, col7
@@ -430,12 +440,12 @@
             • IdentificadorHashGlobal: <code>${identificadorHashGlobal}</code><br>
             • Urna elegida: <strong>${urna}</strong><br>
             • Base de datos elegida: <strong>${bd}</strong><br>
-            • Chain1 (col5): <code>${Chain1}</code><br>
-            • Chain2 (col6): <code>${Chain2}</code><br>
-            • Chain3 (col7): <code>${Chain3}</code><br>
-            • col2 (AES de "traza_paso1_..."): <code>${col2}</code><br>
-            • col3 (AES de "traza_paso2_..."): <code>${col3}</code><br>
-            • col4 (AES de "traza_paso3_..."): <code>${col4}</code><br>
+            • Voto Presidente (nombre claro): <code>${nombrePresidente}</code> → cifrado: <code>${col2}</code><br>
+            • Voto Alcalde (nombre claro): <code>${nombreAlcalde}</code> → cifrado: <code>${col3}</code><br>
+            • Voto Diputado (nombre claro): <code>${nombreDiputado}</code> → cifrado: <code>${col4}</code><br>
+            • Chain1 (col5): <code>${col5}</code><br>
+            • Chain2 (col6): <code>${col6}</code><br>
+            • Chain3 (col7): <code>${col7}</code><br>
         `;
 
         const prettyJson = JSON.stringify(payload, null, 2);
