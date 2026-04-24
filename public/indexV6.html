@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Noack · Votaciones Seguras (Debug con firma + urna)</title>
+    <title>Noack · Votaciones Seguras (Debug con firma del votante)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -208,7 +208,7 @@
 <div class="card">
     <div class="bluey-header">
         <h1><span>🦊</span> Padron electoral 2026 Noack <span>🐈</span>
-            <span class="debug-badge">MODO DEBUG + FIRMA</span>
+            <span class="debug-badge">MODO DEBUG + firma del votante (col1)</span>
         </h1>
         <div class="info-text">✨ Elecciones 2026 para Presidente, Alcalde y Diputado ✨</div>
     </div>
@@ -225,12 +225,12 @@
         <!-- Paso 2: Interfaz de votación (inicialmente oculta) -->
         <div id="step2" class="hidden">
             <div id="votingContainer"></div>
-            <button class="btn-votar finalizar-btn" id="finalizarBtn">✅ Finalizar votación (DEBUG - con firma)</button>
+            <button class="btn-votar finalizar-btn" id="finalizarBtn">✅ Finalizar votación (DEBUG)</button>
         </div>
 
         <div id="resultArea" class="result"></div>
     </div>
-    <footer>🔐 Verificación SHA256 · Votos: firma + " nombre" (o solo firma si nulo) · AES-128-CBC</footer>
+    <footer>🔐 Verificación SHA256 · Votos cifrados con firma individual (col1) + nombre o solo firma si nulo</footer>
 </div>
 
 <script>
@@ -240,9 +240,6 @@
     const keyWordArray = CryptoJS.enc.Utf8.parse(SECRET_KEY);
     const ivWordArray = CryptoJS.enc.Utf8.parse(INIT_VECTOR);
 
-    // --- Firma constante para todos los votos ---
-    const FIRMA = "128ehdub19d1iidn12dn";
-
     function encryptAES128(plaintext) {
         if (plaintext === null || plaintext === undefined) return null;
         const encrypted = CryptoJS.AES.encrypt(plaintext, keyWordArray, {
@@ -251,11 +248,6 @@
             padding: CryptoJS.pad.Pkcs7
         });
         return encrypted.toString();
-    }
-
-    // Validación de formato de boleta (opcional)
-    function isValidBoleta(boleta) {
-        return /^\d{4}64\d{4}$/.test(boleta);
     }
 
     // Datos de ejemplo para las votaciones (3 secciones, 3 opciones cada una)
@@ -286,7 +278,7 @@
         }
     ];
 
-    let identificadorHashGlobal = "";     // Almacena el hash SHA256 de boleta + texto fijo
+    let identificadorHashGlobal = "";     // Almacena el hash SHA256 de boleta + texto fijo (col1)
     let selecciones = {};                 // Guarda los IDs seleccionados (pres1, alc2, etc.) o null
     let nombresSeleccionados = {};        // Guarda los nombres reales de los candidatos o null
 
@@ -399,10 +391,8 @@
         }
     });
 
-    // --- Evento Finalizar votación: MODO DEBUG con firma ---
+    // --- Evento Finalizar votación: MODO DEBUG con firma del votante (col1) ---
     document.getElementById("finalizarBtn").addEventListener("click", async () => {
-        // Ya no se verifica si hay faltantes; se permiten nulos
-
         // 1. Hash con "Noack" (col5)
         const cadenaUsuario = `${identificadorHashGlobal} Noack`;
         const Chain1 = CryptoJS.SHA256(cadenaUsuario).toString();
@@ -417,18 +407,18 @@
         const cadenaBaseDatos = `${Chain2} BD ${bd}`;
         const Chain3 = CryptoJS.SHA256(cadenaBaseDatos).toString();
 
-        // --- Construir el texto plano para cada voto (firma + nombre o solo firma) ---
+        // --- Construir el texto plano para cada voto usando col1 como firma ---
         const nombrePresidente = nombresSeleccionados[0] !== undefined ? nombresSeleccionados[0] : null;
         const nombreAlcalde = nombresSeleccionados[1] !== undefined ? nombresSeleccionados[1] : null;
         const nombreDiputado = nombresSeleccionados[2] !== undefined ? nombresSeleccionados[2] : null;
 
-        let plainPresidente = FIRMA;
-        let plainAlcalde = FIRMA;
-        let plainDiputado = FIRMA;
+        let plainPresidente = identificadorHashGlobal;
+        let plainAlcalde = identificadorHashGlobal;
+        let plainDiputado = identificadorHashGlobal;
 
-        if (nombrePresidente !== null) plainPresidente = FIRMA + " " + nombrePresidente;
-        if (nombreAlcalde !== null) plainAlcalde = FIRMA + " " + nombreAlcalde;
-        if (nombreDiputado !== null) plainDiputado = FIRMA + " " + nombreDiputado;
+        if (nombrePresidente !== null) plainPresidente = identificadorHashGlobal + " " + nombrePresidente;
+        if (nombreAlcalde !== null) plainAlcalde = identificadorHashGlobal + " " + nombreAlcalde;
+        if (nombreDiputado !== null) plainDiputado = identificadorHashGlobal + " " + nombreDiputado;
 
         // Cifrar cada texto plano
         const col2 = encryptAES128(plainPresidente);
@@ -447,9 +437,8 @@
 
         // Información adicional para depuración (mostrar texto plano y cifrado)
         const infoExtra = `
-            <strong>🔍 Detalles de la generación (con firma):</strong><br>
-            • Firma constante: <code>${FIRMA}</code><br>
-            • Firma de la boleta: <code>${identificadorHashGlobal}</code><br>
+            <strong>🔍 Detalles de la generación (firma = col1):</strong><br>
+            • Firma del votante (col1): <code>${identificadorHashGlobal}</code><br>
             • Urna elegida: <strong>${urna}</strong><br>
             • Base de datos elegida: <strong>${bd}</strong><br>
             <br>
