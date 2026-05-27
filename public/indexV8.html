@@ -135,22 +135,18 @@
             text-align: center;
             margin-bottom: 1.5rem;
         }
-        /* Contenedor de candidatos: desplazamiento horizontal en móviles */
         .candidates {
             display: flex;
-            flex-wrap: nowrap;
-            overflow-x: auto;
+            flex-wrap: wrap;
+            justify-content: center;
             gap: 1.5rem;
-            padding-bottom: 0.5rem;
-            justify-content: flex-start;
-            scrollbar-width: thin;
+            margin-bottom: 1rem;
         }
         .candidate-card {
             background: white;
             border-radius: 28px;
             padding: 1rem;
             width: 150px;
-            flex-shrink: 0;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s;
@@ -189,6 +185,24 @@
             font-weight: bold;
             margin-top: 0.5rem;
             display: inline-block;
+        }
+
+        /* Estilos para móviles: tarjetas más pequeñas */
+        @media (max-width: 600px) {
+            .candidate-card {
+                width: 110px;
+                padding: 0.8rem;
+            }
+            .candidate-card img {
+                width: 70px;
+                height: 70px;
+            }
+            .candidate-name {
+                font-size: 0.85rem;
+            }
+            .candidates {
+                gap: 1rem;
+            }
         }
     </style>
 </head>
@@ -283,7 +297,7 @@
     let identificadorHashGlobal = "";
     let selecciones = {};
     let nombresSeleccionados = {};
-    let urnaActual = null;      // Almacena la urna asignada al votante
+    let urnaActual = null;
 
     function renderVotingUI() {
         const container = document.getElementById("votingContainer");
@@ -370,7 +384,6 @@
 
             if (response.ok) {
                 if (data.mensaje === "Votante no encontrado puede votar") {
-                    // Asignar urna aleatoria (1-3) para este votante
                     urnaActual = Math.floor(Math.random() * 3) + 1;
                     document.getElementById("urnaDisplay").innerHTML = `🎲 Urna asignada: <strong>${urnaActual}</strong>`;
                     document.getElementById("step1").classList.add("hidden");
@@ -395,23 +408,18 @@
 
     // Finalizar votación (envío real)
     document.getElementById("finalizarBtn").addEventListener("click", async () => {
-        // Si por alguna razón no hay urna (seguridad), generamos una nueva
         if (!urnaActual) urnaActual = Math.floor(Math.random() * 3) + 1;
 
-        // 1. Hash con "Noack" (col5)
         const cadenaUsuario = `${identificadorHashGlobal} Noack`;
         const Chain1 = CryptoJS.SHA256(cadenaUsuario).toString();
 
-        // 2. Hash con palabra "urna" (col6) usando la urna ya asignada
         const cadenaParaHash = `${Chain1} urna ${urnaActual}`;
         const Chain2 = CryptoJS.SHA256(cadenaParaHash).toString();
 
-        // 3. Base de datos aleatoria (1-3) (col7)
         const bd = Math.floor(Math.random() * 3) + 1;
         const cadenaBaseDatos = `${Chain2} BD ${bd}`;
         const Chain3 = CryptoJS.SHA256(cadenaBaseDatos).toString();
 
-        // --- Votos mezclados ---
         const nombrePresidente = nombresSeleccionados[0] !== undefined ? nombresSeleccionados[0] : null;
         const nombreAlcalde = nombresSeleccionados[1] !== undefined ? nombresSeleccionados[1] : null;
         const nombreDiputado = nombresSeleccionados[2] !== undefined ? nombresSeleccionados[2] : null;
@@ -446,7 +454,6 @@
             const data = await response.json();
             if (response.ok) {
                 mostrarResultado("✅ ¡Voto registrado exitosamente! Gracias por participar.", "success");
-                // Reiniciar interfaz
                 setTimeout(() => {
                     document.getElementById("step2").classList.add("hidden");
                     document.getElementById("step1").classList.remove("hidden");
