@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Noack · Votaciones Seguras</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(145deg, #1b4d6e 0%, #2a6f96 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Comic Neue', system-ui, sans-serif;
+            padding: 20px;
+        }
+        .card {
+            max-width: 900px;
+            width: 100%;
+            background: #fef3e2;
+            border-radius: 48px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+            overflow: hidden;
+            animation: fadeSlideUp 0.6s ease-out;
+        }
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .bluey-header {
+            background: #1e6091;
+            padding: 1rem;
+            text-align: center;
+            border-bottom: 5px solid #f4a261;
+        }
+        .bluey-header h1 {
+            color: #FFE8C5;
+            text-shadow: 3px 3px 0 #c16f2e;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .info-text {
+            background: #e2d5b6;
+            border-radius: 30px;
+            padding: 0.8rem;
+            text-align: center;
+            margin-bottom: 1.8rem;
+            font-weight: bold;
+            color: #2d4a6e;
+        }
+        .content {
+            padding: 2rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #1e3c5c;
+        }
+        textarea {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #f4a261;
+            border-radius: 28px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+        }
+        .btn-votar {
+            background-color: #f4a261;
+            border: none;
+            color: #1e3c72;
+            font-size: 1.3rem;
+            font-weight: bold;
+            padding: 14px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 0 #c76e2e;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-votar:hover { background-color: #e76f51; transform: translateY(-2px); box-shadow: 0 7px 0 #c76e2e; }
+        .result {
+            margin-top: 1.8rem;
+            background: #1e3c5c;
+            border-radius: 28px;
+            padding: 1rem;
+            color: #f0e6c5;
+            font-size: 0.85rem;
+            word-break: break-word;
+            display: none;
+        }
+        .result.show { display: block; }
+        .result.success { background: #2a7a3e; border-left: 8px solid #a5e0a5; }
+        .result.error { background: #9e2d2f; border-left: 8px solid #ffb4a2; }
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #1e3c72;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background: #d9cba3;
+            font-size: 0.7rem;
+            color: #5b4b2e;
+        }
+        .voting-section {
+            margin-top: 2rem;
+            border-top: 2px solid #f4a261;
+            padding-top: 1.5rem;
+        }
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #1e6091;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .candidates {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .candidate-card {
+            background: white;
+            border-radius: 28px;
+            padding: 1rem;
+            width: 150px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 3px solid transparent;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .candidate-card.selected {
+            border-color: #f4a261;
+            background: #fff0e0;
+            transform: scale(1.02);
+        }
+        .candidate-card img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 0.5rem;
+        }
+        .candidate-name {
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        .finalizar-btn {
+            background-color: #2a7a3e;
+            margin-top: 2rem;
+            box-shadow: 0 5px 0 #1e5a2e;
+        }
+        .finalizar-btn:hover { background-color: #1e5a2e; }
+        .hidden { display: none; }
+        .urna-info {
+            background: #f4d03f;
+            color: #1e3c5c;
+            border-radius: 30px;
+            padding: 0.5rem 1rem;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 0.5rem;
+            display: inline-block;
+        }
+
+        /* Móviles: tarjetas más pequeñas para que quepan 3 por fila */
+        @media (max-width: 600px) {
+            .candidate-card {
+                width: 110px;
+                padding: 0.8rem;
+            }
+            .candidate-card img {
+                width: 70px;
+                height: 70px;
+            }
+            .candidate-name {
+                font-size: 0.85rem;
+            }
+            .candidates {
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="bluey-header">
+        <h1><span>🦊</span> Padron electoral 2026 Noack <span>🐈</span></h1>
+        <div class="info-text" id="infoText">✨ Elecciones 2026 para Presidente, Alcalde y Diputado ✨</div>
+    </div>
+    <div class="content">
+        <!-- Paso 1: Ingreso de boleta -->
+        <div id="step1">
+            <div class="form-group">
+                <label>📝 Boleta electoral:</label>
+                <textarea id="boletaInput" rows="2" placeholder="Escribe aquí tu boleta"></textarea>
+            </div>
+            <button class="btn-votar" id="enviarBtn">🗳️ Verificar votante 🔒</button>
+        </div>
+
+        <!-- Paso 2: Interfaz de votación (inicialmente oculta) -->
+        <div id="step2" class="hidden">
+            <div id="urnaDisplay" class="urna-info" style="margin-bottom: 1rem;"></div>
+            <div id="votingContainer"></div>
+            <button class="btn-votar finalizar-btn" id="finalizarBtn">✅ Finalizar votación</button>
+        </div>
+
+        <div id="resultArea" class="result"></div>
+    </div>
+    <footer>🔐 Verificación SHA256 · Votos cifrados con firma + nombre</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script type="module" src="js/votacion.js"></script>
+</body>
+</html>
