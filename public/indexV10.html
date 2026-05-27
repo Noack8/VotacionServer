@@ -93,10 +93,6 @@
             gap: 10px;
         }
         .btn:hover { background-color: #e76f51; transform: translateY(-2px); box-shadow: 0 7px 0 #c76e2e; }
-        .btn-secundario {
-            background-color: #6c757d;
-            box-shadow: 0 5px 0 #495057;
-        }
         .result {
             margin-top: 1.8rem;
             background: #1e3c5c;
@@ -110,7 +106,6 @@
         .result.show { display: block; }
         .result.success { background: #2a7a3e; border-left: 8px solid #a5e0a5; }
         .result.error { background: #9e2d2f; border-left: 8px solid #ffb4a2; }
-        .result.debug { background: #3a6b92; border-left: 8px solid #f4d03f; }
         .spinner {
             display: inline-block;
             width: 18px;
@@ -145,16 +140,6 @@
             display: inline-block;
             margin-left: 10px;
         }
-        pre {
-            background: #2c3e50;
-            padding: 12px;
-            border-radius: 16px;
-            overflow-x: auto;
-            font-family: monospace;
-            font-size: 12px;
-            color: #f0e6c5;
-            margin: 8px 0;
-        }
         .logout-btn {
             background: #9e2d2f;
             box-shadow: 0 5px 0 #6d1f21;
@@ -169,16 +154,32 @@
             flex-wrap: wrap;
             gap: 0.5rem;
         }
+        /* Estilos para candidatos (responsive) */
+        .candidates { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem; margin-bottom: 1rem; }
+        .candidate-card { background: white; border-radius: 28px; padding: 1rem; width: 150px; text-align: center; cursor: pointer; transition: all 0.2s; border: 3px solid transparent; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .candidate-card.selected { border-color: #f4a261; background: #fff0e0; transform: scale(1.02); }
+        .candidate-card img { width: 100px; height: 100px; object-fit: cover; border-radius: 50%; margin-bottom: 0.5rem; }
+        .candidate-name { font-weight: bold; font-size: 1rem; }
+        @media (max-width: 600px) {
+            .candidate-card { width: 110px; padding: 0.8rem; }
+            .candidate-card img { width: 70px; height: 70px; }
+            .candidate-name { font-size: 0.85rem; }
+            .candidates { gap: 1rem; }
+        }
+        .voting-section { margin-top: 2rem; border-top: 2px solid #f4a261; padding-top: 1.5rem; }
+        .section-title { font-size: 1.8rem; font-weight: bold; color: #1e6091; text-align: center; margin-bottom: 1.5rem; }
+        .finalizar-btn { background-color: #2a7a3e; margin-top: 2rem; box-shadow: 0 5px 0 #1e5a2e; }
+        .finalizar-btn:hover { background-color: #1e5a2e; }
     </style>
 </head>
 <body>
 <div class="card">
     <div class="bluey-header">
         <h1><span>🦊</span> Padron electoral 2026 Noack <span>🐈</span></h1>
-        <div class="info-text">✨ Sistema de votación con autenticación de supervisores ✨</div>
+        <div class="info-text">✨ Sistema de votación con autenticación de supervisores (SHA1) ✨</div>
     </div>
     <div class="content">
-        <!-- SECCIÓN DE LOGIN REAL -->
+        <!-- SECCIÓN DE LOGIN -->
         <div id="loginSection">
             <div class="login-box">
                 <h2 style="color: #1e6091; margin-bottom: 1rem;">🔐 Acceso supervisor</h2>
@@ -195,7 +196,7 @@
             </div>
         </div>
 
-        <!-- SECCIÓN DE VOTACIÓN (se muestra solo tras login exitoso) -->
+        <!-- SECCIÓN DE VOTACIÓN (se muestra tras login exitoso) -->
         <div id="votingAppSection" class="hidden">
             <div class="supervisor-bar">
                 <div class="info-text" style="margin-bottom:0; flex:1;" id="supervisorInfo"></div>
@@ -220,7 +221,7 @@
 
         <div id="resultArea" class="result"></div>
     </div>
-    <footer>🔐 Autenticación con hash SHA256 · Votos cifrados AES-128-CBC</footer>
+    <footer>🔐 Autenticación con SHA1 · Votos cifrados AES-128-CBC</footer>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
@@ -255,7 +256,7 @@
         return resultado;
     }
 
-    // Lista de candidatos (misma que antes)
+    // Lista de candidatos
     const secciones = [
         { nombre: "Presidente", candidatos: [
             { id: "pres1", nombre: "Juan Pérez", imagen: "/imagenes/JuanPerez.jpg" },
@@ -279,7 +280,7 @@
     let selecciones = {};
     let nombresSeleccionados = {};
     let urnaActual = null;
-    let supervisorActual = null;      // nombre de usuario (sin hash)
+    let supervisorActual = null;
 
     // Elementos DOM
     const loginSection = document.getElementById("loginSection");
@@ -302,7 +303,7 @@
     }
 
     function ocultarResultado() {
-        resultArea.classList.remove("show", "success", "error", "debug");
+        resultArea.classList.remove("show", "success", "error");
         resultArea.innerHTML = "";
     }
 
@@ -346,7 +347,7 @@
         });
     }
 
-    // --- LOGIN REAL con hashes SHA256 ---
+    // --- LOGIN con SHA1 ---
     document.getElementById("loginRealBtn").addEventListener("click", async () => {
         const username = document.getElementById("usuarioInput").value.trim();
         const password = document.getElementById("passwordInput").value.trim();
@@ -355,9 +356,9 @@
             loginResultDiv.classList.add("show", "error");
             return;
         }
-        // Calcular hashes SHA256 de username y password
-        const hashUsername = CryptoJS.SHA256(username).toString();
-        const hashPassword = CryptoJS.SHA256(password).toString();
+        // Calcular hashes SHA1
+        const hashUsername = CryptoJS.SHA1(username).toString();
+        const hashPassword = CryptoJS.SHA1(password).toString();
 
         const btn = document.getElementById("loginRealBtn");
         const originalText = btn.innerHTML;
@@ -372,14 +373,13 @@
             });
             const data = await response.json();
             if (response.ok) {
-                // Login exitoso
-                supervisorActual = username;  // guardamos el nombre en claro para mostrarlo
+                supervisorActual = username;
                 loginSection.classList.add("hidden");
                 votingAppSection.classList.remove("hidden");
                 supervisorInfo.innerHTML = `👤 Supervisor activo: <strong>${escapeHtml(username)}</strong>`;
                 ocultarResultado();
                 loginResultDiv.classList.remove("show");
-                // Reiniciamos estado de votación por si acaso
+                // Reiniciar estado
                 step1Div.classList.remove("hidden");
                 step2Div.classList.add("hidden");
                 boletaInput.value = "";
@@ -419,7 +419,6 @@
             mostrarResultado("❌ Por favor ingresa una boleta.", "error");
             return;
         }
-        // Calcular hash de la boleta (igual que antes)
         const textoConstante = " Sistema de votaciones 2026";
         const concatenado = boletaPlana + textoConstante;
         const hashSha256 = CryptoJS.SHA256(concatenado).toString();
@@ -460,11 +459,10 @@
         }
     });
 
-    // --- REGISTRAR VOTO (mismo endpoint /registrar-voto) ---
+    // --- REGISTRAR VOTO ---
     finalizarBtn.addEventListener("click", async () => {
         if (!urnaActual) urnaActual = Math.floor(Math.random() * 3) + 1;
 
-        // Trazabilidad
         const cadenaUsuario = `${identificadorHashGlobal} Noack`;
         const Chain1 = CryptoJS.SHA256(cadenaUsuario).toString();
         const cadenaParaHash = `${Chain1} urna ${urnaActual}`;
@@ -473,7 +471,6 @@
         const cadenaBaseDatos = `${Chain2} BD ${bd}`;
         const Chain3 = CryptoJS.SHA256(cadenaBaseDatos).toString();
 
-        // Votos mezclados
         const nombrePresidente = nombresSeleccionados[0] !== undefined ? nombresSeleccionados[0] : null;
         const nombreAlcalde = nombresSeleccionados[1] !== undefined ? nombresSeleccionados[1] : null;
         const nombreDiputado = nombresSeleccionados[2] !== undefined ? nombresSeleccionados[2] : null;
@@ -492,7 +489,6 @@
             col5: Chain1,
             col6: Chain2,
             col7: Chain3
-            // Opcional: podrías agregar supervisor: supervisorActual si la BD lo soporta
         };
 
         const originalText = finalizarBtn.innerHTML;
@@ -508,7 +504,6 @@
             const data = await response.json();
             if (response.ok) {
                 mostrarResultado("✅ ¡Voto registrado exitosamente! Gracias por participar.", "success");
-                // Reiniciar para siguiente votante
                 setTimeout(() => {
                     step2Div.classList.add("hidden");
                     step1Div.classList.remove("hidden");
@@ -539,28 +534,6 @@
             return m;
         });
     }
-
-    // Inyectar estilos para candidatos (por si acaso)
-    const style = document.createElement('style');
-    style.textContent = `
-        .candidates { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem; margin-bottom: 1rem; }
-        .candidate-card { background: white; border-radius: 28px; padding: 1rem; width: 150px; text-align: center; cursor: pointer; transition: all 0.2s; border: 3px solid transparent; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        .candidate-card.selected { border-color: #f4a261; background: #fff0e0; transform: scale(1.02); }
-        .candidate-card img { width: 100px; height: 100px; object-fit: cover; border-radius: 50%; margin-bottom: 0.5rem; }
-        .candidate-name { font-weight: bold; font-size: 1rem; }
-        @media (max-width: 600px) {
-            .candidate-card { width: 110px; padding: 0.8rem; }
-            .candidate-card img { width: 70px; height: 70px; }
-            .candidate-name { font-size: 0.85rem; }
-            .candidates { gap: 1rem; }
-        }
-        .voting-section { margin-top: 2rem; border-top: 2px solid #f4a261; padding-top: 1.5rem; }
-        .section-title { font-size: 1.8rem; font-weight: bold; color: #1e6091; text-align: center; margin-bottom: 1.5rem; }
-        .finalizar-btn { background-color: #2a7a3e; margin-top: 2rem; box-shadow: 0 5px 0 #1e5a2e; }
-        .finalizar-btn:hover { background-color: #1e5a2e; }
-        .hidden { display: none; }
-    `;
-    document.head.appendChild(style);
 </script>
 </body>
 </html>
