@@ -2,6 +2,18 @@ Texto plano                                 HASH sha 1
 Sistema de votaciones 2026
 Votaciones Base de Datos Noack              22F59A4D69DD060051847ACD559822653E363AEB
 
+Supervisores                                f053213d914b6b87715eb8aaad72a3a7ded38c81
+Usuario                                     3f2ecdef3c6c3b614e34115a95b25944cfa4198a
+Password                                    8be3c943b1609fffbfc51aad666d0a04adf83c9d
+
+CREATE TABLE tf053213d914b6b87715eb8aaad72a3a7ded38c81 (
+  a3f2ecdef3c6c3b614e34115a95b25944cfa4198a TEXT, --Usuario
+  a8be3c943b1609fffbfc51aad666d0a04adf83c9d TEXT  --Password
+);
+insert into tf053213d914b6b87715eb8aaad72a3a7ded38c81 (a3f2ecdef3c6c3b614e34115a95b25944cfa4198a,a8be3c943b1609fffbfc51aad666d0a04adf83c9d) 
+values ('c5652d9cc6bcf28e0e20210eae5ef9e54ba35717','dfd677c5f3f28f730fd0a0d7c2322c10b6c1f9d5');
+
+
 Registro de votaciones                      a7e41e2f119cd9d111c0738f2c71bd336467216b
 Voto 1 Presidente                           90457f37945b8dfb83e1b46c6e7e042e02d91984
 Voto 2 Alcalde                              790d32ac3577c9048b63b8e56391bd0d63f9ecf4

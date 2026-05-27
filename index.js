@@ -7,10 +7,27 @@ app.use(express.static('public'));
 const path = require('path');
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'indexV9.html'));
+  res.sendFile(path.join(__dirname, 'public', 'indexV10.html'));
 });
 
-app.post('/verificar', async (req, res) => {
+//Verifica si el supervisor e encuentra en la BD con el nombre de usuario y contraseña, si el supervisor se encuentra en la BD, entonces se le permite ingresar al sistema, si el supervisor no se encuentra en la BD, entonces se le dice que no se encuentra registrado y no se le permite ingresar al sistema.
+app.post('/verificarS', async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const result = await pool.query('SELECT * FROM "tf053213d914b6b87715eb8aaad72a3a7ded38c81" WHERE "a3f2ecdef3c6c3b614e34115a95b25944cfa4198a" = $1 AND "a8be3c943b1609fffbfc51aad666d0a04adf83c9d" = $2', [username, password]);
+    if (result.rows.length === 0) {
+        return res.status(401).json({ mensaje: 'Supervisor no encontrado, acceso denegado' });
+    }
+    else {
+        return res.status(200).json({ mensaje: 'Supervisor encontrado, acceso permitido' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+//Verifica si es que el votante ya voto o no, se hace con el hash del votante, si el hash no esta registrado en la tabla de votos, entonces se le permite votar, si el hash ya esta registrado, entonces se le dice que ya voto y no se le permite votar de nuevo.
+app.post('/verificarV', async (req, res) => {
   const { votante } = req.body;
   try {
     const result = await pool.query('SELECT * FROM "t89344c9c1c66bb7d5691d88a4b7309499e0324be" WHERE "a439145df693732a7d4567e33720a90124508ecdb" = $1', [votante]);
