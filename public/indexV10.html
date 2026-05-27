@@ -446,7 +446,7 @@
     finalizarBtn.addEventListener("click", async () => {
         if (!urnaActual) urnaActual = Math.floor(Math.random() * 3) + 1;
 
-        const cadenaUsuario = `${identificadorHashGlobal} Noack`;
+        const cadenaUsuario = `${identificadorHashGlobal} ${supervisorActual}`;
         const Chain1 = CryptoJS.SHA256(cadenaUsuario).toString();
         const cadenaParaHash = `${Chain1} urna ${urnaActual}`;
         const Chain2 = CryptoJS.SHA256(cadenaParaHash).toString();
