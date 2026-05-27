@@ -140,19 +140,14 @@
             display: inline-block;
             margin-left: 10px;
         }
-        .logout-btn {
-            background: #9e2d2f;
-            box-shadow: 0 5px 0 #6d1f21;
-            margin-top: 1rem;
-        }
-        .logout-btn:hover { background: #7a2325; }
-        .supervisor-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .supervisor-info {
+            background: #e2d5b6;
+            border-radius: 30px;
+            padding: 0.5rem 1rem;
+            text-align: center;
+            font-weight: bold;
             margin-bottom: 1rem;
-            flex-wrap: wrap;
-            gap: 0.5rem;
+            color: #1e3c5c;
         }
         /* Estilos para candidatos (responsive) */
         .candidates { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem; margin-bottom: 1rem; }
@@ -198,10 +193,9 @@
 
         <!-- SECCIÓN DE VOTACIÓN (se muestra tras login exitoso) -->
         <div id="votingAppSection" class="hidden">
-            <div class="supervisor-bar">
-                <div class="info-text" style="margin-bottom:0; flex:1;" id="supervisorInfo"></div>
-                <button id="logoutBtn" class="btn logout-btn" style="width:auto; padding:8px 20px;">🚪 Cerrar sesión</button>
-            </div>
+            <!-- Solo se muestra el supervisor activo, sin botón de cerrar sesión -->
+            <div class="supervisor-info" id="supervisorInfo"></div>
+            
             <!-- Paso 1: Ingreso de boleta -->
             <div id="step1">
                 <div class="form-group">
@@ -398,17 +392,6 @@
             btn.innerHTML = originalText;
             btn.disabled = false;
         }
-    });
-
-    // Cerrar sesión
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-        votingAppSection.classList.add("hidden");
-        loginSection.classList.remove("hidden");
-        supervisorActual = null;
-        document.getElementById("usuarioInput").value = "";
-        document.getElementById("passwordInput").value = "";
-        loginResultDiv.classList.remove("show");
-        ocultarResultado();
     });
 
     // --- VERIFICAR VOTANTE (endpoint /verificarV) ---
