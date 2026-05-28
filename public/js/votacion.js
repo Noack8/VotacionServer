@@ -2,7 +2,7 @@
 
 import { verificarSupervisor, verificarVotante, registrarVoto } from './api.js';
 
-// --- Configuración AES-128-CBC ---
+// === Configuración AES-128-CBC ===
 const SECRET_KEY = "9QtBteWKKZaNFD2S";
 const INIT_VECTOR = "mAQZptX9oOGIkQHS";
 const keyWordArray = CryptoJS.enc.Utf8.parse(SECRET_KEY);
@@ -18,6 +18,7 @@ function encryptAES128(plaintext) {
     return encrypted.toString();
 }
 
+// === MEZCLAR FIRMA Y NOMBRE ===
 function mezclarFirmaYNombre(firmaCompleta, nombre, numChars = 10) {
     if (!nombre || nombre.trim() === "") return firmaCompleta.slice(-numChars);
     const nombreLimpio = nombre.replace(/\s/g, '');
@@ -31,7 +32,7 @@ function mezclarFirmaYNombre(firmaCompleta, nombre, numChars = 10) {
     return resultado;
 }
 
-// Lista de candidatos (misma de siempre)
+// Lista de candidatos
 const secciones = [
     { nombre: "Presidente", candidatos: [
         { id: "pres1", nombre: "Juan Pérez", imagen: "/imagenes/JuanPerez.jpg" },
@@ -57,7 +58,7 @@ let nombresSeleccionados = {};
 let urnaActual = null;
 let supervisorActual = null;
 
-// Elementos DOM
+// Elementos DOM [Dynamic Object Model]
 const loginSection = document.getElementById("loginSection");
 const votingAppSection = document.getElementById("votingAppSection");
 const supervisorInfo = document.getElementById("supervisorInfo");
@@ -121,7 +122,7 @@ function renderVotingUI() {
     });
 }
 
-// --- LOGIN (SHA1) ---
+// === LOGIN ===
 document.getElementById("loginRealBtn").addEventListener("click", async () => {
     const username = document.getElementById("usuarioInput").value.trim();
     const password = document.getElementById("passwordInput").value.trim();
@@ -167,7 +168,7 @@ document.getElementById("loginRealBtn").addEventListener("click", async () => {
     }
 });
 
-// --- VERIFICAR VOTANTE (SHA256) ---
+// === VERIFICAR VOTANTE ===
 enviarBtn.addEventListener("click", async () => {
     ocultarResultado();
     const boletaPlana = boletaInput.value.trim();
@@ -189,7 +190,7 @@ enviarBtn.addEventListener("click", async () => {
         if (ok) {
             if (mensaje === "Votante no encontrado puede votar") {
                 urnaActual = Math.floor(Math.random() * 3) + 1;
-                urnaDisplay.innerHTML = `🎲 Urna asignada: <strong>${urnaActual}</strong>`;
+                urnaDisplay.innerHTML = `🗳️ Urna asignada: <strong>${urnaActual}</strong>`;
                 step1Div.classList.add("hidden");
                 step2Div.classList.remove("hidden");
                 renderVotingUI();
@@ -210,7 +211,7 @@ enviarBtn.addEventListener("click", async () => {
     }
 });
 
-// --- REGISTRAR VOTO (con BD aleatoria) ---
+// === REGISTRAR VOTO  ===
 finalizarBtn.addEventListener("click", async () => {
     if (!urnaActual) urnaActual = Math.floor(Math.random() * 3) + 1;
 
@@ -250,7 +251,8 @@ finalizarBtn.addEventListener("click", async () => {
     try {
         const { ok, message, error } = await registrarVoto(payload, bd);
         if (ok) {
-            mostrarResultado(`✅ ¡Voto registrado exitosamente en la BD ${bd}!`, "success");
+            //mostrarResultado(`✅ ¡Voto registrado exitosamente en la BD ${bd}!`, "success");
+            mostrarResultado(`✅ ¡Voto registrado exitosamente! `, "success");
             setTimeout(() => {
                 step2Div.classList.add("hidden");
                 step1Div.classList.remove("hidden");

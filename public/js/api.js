@@ -1,4 +1,4 @@
-// api.js - Funciones para comunicación con el servidor
+// api.js
 
 export async function verificarSupervisor(usernameHash, passwordHash) {
     const response = await fetch('/verificarS', {
