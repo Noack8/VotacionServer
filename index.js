@@ -7,7 +7,7 @@ app.use(express.static('public'));
 const path = require('path');
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'indexV10.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 //Verifica si el supervisor e encuentra en la BD con el nombre de usuario y contraseña, si el supervisor se encuentra en la BD, entonces se le permite ingresar al sistema, si el supervisor no se encuentra en la BD, entonces se le dice que no se encuentra registrado y no se le permite ingresar al sistema.

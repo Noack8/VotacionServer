@@ -66,7 +66,7 @@
             margin-bottom: 8px;
             color: #1e3c5c;
         }
-        textarea {
+        input, textarea {
             width: 100%;
             padding: 14px;
             border: 2px solid #f4a261;
@@ -75,7 +75,7 @@
             font-size: 0.9rem;
             resize: vertical;
         }
-        .btn-votar {
+        .btn {
             background-color: #f4a261;
             border: none;
             color: #1e3c72;
@@ -92,7 +92,7 @@
             justify-content: center;
             gap: 10px;
         }
-        .btn-votar:hover { background-color: #e76f51; transform: translateY(-2px); box-shadow: 0 7px 0 #c76e2e; }
+        .btn:hover { background-color: #e76f51; transform: translateY(-2px); box-shadow: 0 7px 0 #c76e2e; }
         .result {
             margin-top: 1.8rem;
             background: #1e3c5c;
@@ -123,117 +123,83 @@
             font-size: 0.7rem;
             color: #5b4b2e;
         }
-        .voting-section {
-            margin-top: 2rem;
-            border-top: 2px solid #f4a261;
-            padding-top: 1.5rem;
-        }
-        .section-title {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #1e6091;
-            text-align: center;
+        .hidden { display: none; }
+        .login-box {
+            background: #fff7e8;
+            border-radius: 32px;
+            padding: 1.5rem;
             margin-bottom: 1.5rem;
         }
-        .candidates {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 1.5rem;
-            margin-bottom: 1rem;
-        }
-        .candidate-card {
-            background: white;
-            border-radius: 28px;
-            padding: 1rem;
-            width: 150px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 3px solid transparent;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        .candidate-card.selected {
-            border-color: #f4a261;
-            background: #fff0e0;
-            transform: scale(1.02);
-        }
-        .candidate-card img {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 50%;
-            margin-bottom: 0.5rem;
-        }
-        .candidate-name {
-            font-weight: bold;
-            font-size: 1rem;
-        }
-        .finalizar-btn {
-            background-color: #2a7a3e;
-            margin-top: 2rem;
-            box-shadow: 0 5px 0 #1e5a2e;
-        }
-        .finalizar-btn:hover { background-color: #1e5a2e; }
-        .hidden { display: none; }
-        .urna-info {
-            background: #f4d03f;
-            color: #1e3c5c;
+        .supervisor-info {
+            background: #e2d5b6;
             border-radius: 30px;
             padding: 0.5rem 1rem;
             text-align: center;
             font-weight: bold;
-            margin-top: 0.5rem;
-            display: inline-block;
+            margin-bottom: 1rem;
+            color: #1e3c5c;
         }
-
-        /* Móviles: tarjetas más pequeñas para que quepan 3 por fila */
+        .candidates { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem; margin-bottom: 1rem; }
+        .candidate-card { background: white; border-radius: 28px; padding: 1rem; width: 150px; text-align: center; cursor: pointer; transition: all 0.2s; border: 3px solid transparent; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .candidate-card.selected { border-color: #f4a261; background: #fff0e0; transform: scale(1.02); }
+        .candidate-card img { width: 100px; height: 100px; object-fit: cover; border-radius: 50%; margin-bottom: 0.5rem; }
+        .candidate-name { font-weight: bold; font-size: 1rem; }
         @media (max-width: 600px) {
-            .candidate-card {
-                width: 110px;
-                padding: 0.8rem;
-            }
-            .candidate-card img {
-                width: 70px;
-                height: 70px;
-            }
-            .candidate-name {
-                font-size: 0.85rem;
-            }
-            .candidates {
-                gap: 1rem;
-            }
+            .candidate-card { width: 110px; padding: 0.8rem; }
+            .candidate-card img { width: 70px; height: 70px; }
+            .candidate-name { font-size: 0.85rem; }
+            .candidates { gap: 1rem; }
         }
+        .voting-section { margin-top: 2rem; border-top: 2px solid #f4a261; padding-top: 1.5rem; }
+        .section-title { font-size: 1.8rem; font-weight: bold; color: #1e6091; text-align: center; margin-bottom: 1.5rem; }
+        .finalizar-btn { background-color: #2a7a3e; margin-top: 2rem; box-shadow: 0 5px 0 #1e5a2e; }
+        .finalizar-btn:hover { background-color: #1e5a2e; }
     </style>
 </head>
 <body>
 <div class="card">
     <div class="bluey-header">
         <h1><span>🦊</span> Padron electoral 2026 Noack <span>🐈</span></h1>
-        <div class="info-text" id="infoText">✨ Elecciones 2026 para Presidente, Alcalde y Diputado ✨</div>
+        <div class="info-text">✨ Sistema de votación con autenticación de supervisores (SHA1) ✨</div>
     </div>
     <div class="content">
-        <!-- Paso 1: Ingreso de boleta -->
-        <div id="step1">
-            <div class="form-group">
-                <label>📝 Boleta electoral:</label>
-                <textarea id="boletaInput" rows="2" placeholder="Escribe aquí tu boleta"></textarea>
+        <!-- SECCIÓN DE LOGIN -->
+        <div id="loginSection">
+            <div class="login-box">
+                <h2 style="color: #1e6091; margin-bottom: 1rem;">🔐 Acceso supervisor</h2>
+                <div class="form-group">
+                    <label>👤 Usuario:</label>
+                    <input type="text" id="usuarioInput" placeholder="admin, supervisor1">
+                </div>
+                <div class="form-group">
+                    <label>🔑 Contraseña:</label>
+                    <input type="password" id="passwordInput" placeholder="Contraseña">
+                </div>
+                <button class="btn" id="loginRealBtn">🔓 Iniciar sesión</button>
+                <div id="loginResult" class="result"></div>
             </div>
-            <button class="btn-votar" id="enviarBtn">🗳️ Verificar votante 🔒</button>
         </div>
 
-        <!-- Paso 2: Interfaz de votación (inicialmente oculta) -->
-        <div id="step2" class="hidden">
-            <div id="urnaDisplay" class="urna-info" style="margin-bottom: 1rem;"></div>
-            <div id="votingContainer"></div>
-            <button class="btn-votar finalizar-btn" id="finalizarBtn">✅ Finalizar votación</button>
+        <!-- SECCIÓN DE VOTACIÓN -->
+        <div id="votingAppSection" class="hidden">
+            <div class="supervisor-info" id="supervisorInfo"></div>
+            <div id="step1">
+                <div class="form-group">
+                    <label>📝 Boleta electoral:</label>
+                    <textarea id="boletaInput" rows="2" placeholder="Escribe aquí tu boleta (10 dígitos con '64' en medio)"></textarea>
+                </div>
+                <button class="btn" id="enviarBtn">🗳️ Verificar votante 🔒</button>
+            </div>
+            <div id="step2" class="hidden">
+                <div id="urnaDisplay" style="background:#f4d03f; border-radius:30px; padding:0.5rem 1rem; text-align:center; font-weight:bold; margin-bottom:1rem; display:inline-block;"></div>
+                <div id="votingContainer"></div>
+                <button class="btn finalizar-btn" id="finalizarBtn">✅ Finalizar votación</button>
+            </div>
         </div>
-
         <div id="resultArea" class="result"></div>
     </div>
-    <footer>🔐 Verificación SHA256 · Votos cifrados con firma + nombre</footer>
+    <footer>🔐 Autenticación SHA1 · Votos cifrados AES-128-CBC · Redundancia 3 BD</footer>
 </div>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <script type="module" src="js/votacion.js"></script>
 </body>

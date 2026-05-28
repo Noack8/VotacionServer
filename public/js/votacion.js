@@ -1,7 +1,8 @@
-// votacion.js
-import { verificarVotante, registrarVoto } from './api.js';
+// votacion.js - Lógica de cifrado, mezcla, renderizado y eventos
 
-// --- Configuración de cifrado AES-128-CBC ---
+import { verificarSupervisor, verificarVotante, registrarVoto } from './api.js';
+
+// --- Configuración AES-128-CBC ---
 const SECRET_KEY = "9QtBteWKKZaNFD2S";
 const INIT_VECTOR = "mAQZptX9oOGIkQHS";
 const keyWordArray = CryptoJS.enc.Utf8.parse(SECRET_KEY);
@@ -17,11 +18,8 @@ function encryptAES128(plaintext) {
     return encrypted.toString();
 }
 
-// Función para intercalar últimos 10 caracteres de la firma con el nombre (sin espacios)
 function mezclarFirmaYNombre(firmaCompleta, nombre, numChars = 10) {
-    if (!nombre || nombre.trim() === "") {
-        return firmaCompleta.slice(-numChars);
-    }
+    if (!nombre || nombre.trim() === "") return firmaCompleta.slice(-numChars);
     const nombreLimpio = nombre.replace(/\s/g, '');
     const parteFirma = firmaCompleta.slice(-numChars);
     let resultado = "";
@@ -33,68 +31,67 @@ function mezclarFirmaYNombre(firmaCompleta, nombre, numChars = 10) {
     return resultado;
 }
 
-// Lista de candidatos
+// Lista de candidatos (misma de siempre)
 const secciones = [
-    {
-        nombre: "Presidente",
-        candidatos: [
-            { id: "pres1", nombre: "Juan Pérez", imagen: "/imagenes/JuanPerez.jpg" },
-            { id: "pres2", nombre: "María López", imagen: "/imagenes/MariaLopez.jpg" },
-            { id: "pres3", nombre: "Carlos Ruiz", imagen: "/imagenes/CarlosRuiz.jpg" }
-        ]
-    },
-    {
-        nombre: "Alcalde",
-        candidatos: [
-            { id: "alc1", nombre: "Ana Gómez", imagen: "/imagenes/AnaGomez.jpg" },
-            { id: "alc2", nombre: "Luis Fernández", imagen: "/imagenes/LuisFernandez.jpg" },
-            { id: "alc3", nombre: "Sofía Martínez", imagen: "/imagenes/SofiaMartinez.jpg" }
-        ]
-    },
-    {
-        nombre: "Diputado",
-        candidatos: [
-            { id: "dip1", nombre: "Pedro Rojas", imagen: "/imagenes/PedroRojas.jpg" },
-            { id: "dip2", nombre: "Laura Silva", imagen: "/imagenes/LauraSilva.jpg" },
-            { id: "dip3", nombre: "Diego Castro", imagen: "/imagenes/DiegoCastro.jpg" }
-        ]
-    }
+    { nombre: "Presidente", candidatos: [
+        { id: "pres1", nombre: "Juan Pérez", imagen: "/imagenes/JuanPerez.jpg" },
+        { id: "pres2", nombre: "María López", imagen: "/imagenes/MariaLopez.jpg" },
+        { id: "pres3", nombre: "Carlos Ruiz", imagen: "/imagenes/CarlosRuiz.jpg" }
+    ] },
+    { nombre: "Alcalde", candidatos: [
+        { id: "alc1", nombre: "Ana Gómez", imagen: "/imagenes/AnaGomez.jpg" },
+        { id: "alc2", nombre: "Luis Fernández", imagen: "/imagenes/LuisFernandez.jpg" },
+        { id: "alc3", nombre: "Sofía Martínez", imagen: "/imagenes/SofiaMartinez.jpg" }
+    ] },
+    { nombre: "Diputado", candidatos: [
+        { id: "dip1", nombre: "Pedro Rojas", imagen: "/imagenes/PedroRojas.jpg" },
+        { id: "dip2", nombre: "Laura Silva", imagen: "/imagenes/LauraSilva.jpg" },
+        { id: "dip3", nombre: "Diego Castro", imagen: "/imagenes/DiegoCastro.jpg" }
+    ] }
 ];
 
-// Variables globales del módulo
+// Variables de estado
 let identificadorHashGlobal = "";
 let selecciones = {};
 let nombresSeleccionados = {};
 let urnaActual = null;
+let supervisorActual = null;
 
-// Función para mostrar mensajes al usuario
+// Elementos DOM
+const loginSection = document.getElementById("loginSection");
+const votingAppSection = document.getElementById("votingAppSection");
+const supervisorInfo = document.getElementById("supervisorInfo");
+const loginResultDiv = document.getElementById("loginResult");
+const resultArea = document.getElementById("resultArea");
+const boletaInput = document.getElementById("boletaInput");
+const step1Div = document.getElementById("step1");
+const step2Div = document.getElementById("step2");
+const urnaDisplay = document.getElementById("urnaDisplay");
+const votingContainer = document.getElementById("votingContainer");
+const enviarBtn = document.getElementById("enviarBtn");
+const finalizarBtn = document.getElementById("finalizarBtn");
+
 function mostrarResultado(mensaje, tipo = 'success') {
-    const resultArea = document.getElementById("resultArea");
     resultArea.innerHTML = mensaje;
     resultArea.classList.add("show", tipo);
     resultArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function ocultarResultado() {
-    const resultArea = document.getElementById("resultArea");
     resultArea.classList.remove("show", "success", "error");
     resultArea.innerHTML = "";
 }
 
-// Renderizar la interfaz de votación
 function renderVotingUI() {
-    const container = document.getElementById("votingContainer");
-    container.innerHTML = "";
+    votingContainer.innerHTML = "";
     selecciones = {};
     nombresSeleccionados = {};
-
     secciones.forEach((seccion, idx) => {
         const sectionDiv = document.createElement("div");
         sectionDiv.className = "voting-section";
         sectionDiv.innerHTML = `<div class="section-title">${seccion.nombre}</div>`;
         const candidatesDiv = document.createElement("div");
         candidatesDiv.className = "candidates";
-        
         seccion.candidatos.forEach(cand => {
             const card = document.createElement("div");
             card.className = "candidate-card";
@@ -120,122 +117,162 @@ function renderVotingUI() {
             candidatesDiv.appendChild(card);
         });
         sectionDiv.appendChild(candidatesDiv);
-        container.appendChild(sectionDiv);
+        votingContainer.appendChild(sectionDiv);
     });
 }
 
-// --- Eventos al cargar la página ---
-document.addEventListener('DOMContentLoaded', () => {
-    const btnEnviar = document.getElementById("enviarBtn");
-    const btnFinalizar = document.getElementById("finalizarBtn");
+// --- LOGIN (SHA1) ---
+document.getElementById("loginRealBtn").addEventListener("click", async () => {
+    const username = document.getElementById("usuarioInput").value.trim();
+    const password = document.getElementById("passwordInput").value.trim();
+    if (!username || !password) {
+        loginResultDiv.innerHTML = "❌ Completa ambos campos.";
+        loginResultDiv.classList.add("show", "error");
+        return;
+    }
+    const hashUsername = CryptoJS.SHA1(username).toString();
+    const hashPassword = CryptoJS.SHA1(password).toString();
 
-    // Verificar boleta
-    btnEnviar.addEventListener("click", async () => {
-        ocultarResultado();
-        const boletaPlana = document.getElementById("boletaInput").value.trim();
+    const btn = document.getElementById("loginRealBtn");
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner"></span> Verificando...';
+    btn.disabled = true;
 
-        if (!boletaPlana) {
-            mostrarResultado("❌ Por favor ingresa una boleta.", "error");
-            return;
+    try {
+        const { ok, mensaje, error } = await verificarSupervisor(hashUsername, hashPassword);
+        if (ok) {
+            supervisorActual = username;
+            loginSection.classList.add("hidden");
+            votingAppSection.classList.remove("hidden");
+            supervisorInfo.innerHTML = `👤 Supervisor activo: <strong>${escapeHtml(username)}</strong>`;
+            ocultarResultado();
+            loginResultDiv.classList.remove("show");
+            step1Div.classList.remove("hidden");
+            step2Div.classList.add("hidden");
+            boletaInput.value = "";
+            identificadorHashGlobal = "";
+            selecciones = {};
+            nombresSeleccionados = {};
+            urnaActual = null;
+        } else {
+            loginResultDiv.innerHTML = `❌ ${mensaje || "Acceso denegado"}`;
+            loginResultDiv.classList.add("show", "error");
         }
-
-        const textoConstante = " Sistema de votaciones 2026";
-        const concatenado = boletaPlana + textoConstante;
-        const hashSha256 = CryptoJS.SHA256(concatenado).toString();
-        identificadorHashGlobal = hashSha256;
-
-        const btn = document.getElementById("enviarBtn");
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<span class="spinner"></span> Verificando hash...';
-        btn.disabled = true;
-
-        try {
-            const { ok, mensaje, error } = await verificarVotante(identificadorHashGlobal);
-            if (ok) {
-                if (mensaje === "Votante no encontrado puede votar") {
-                    urnaActual = Math.floor(Math.random() * 3) + 1;
-                    document.getElementById("urnaDisplay").innerHTML = `🎲 Urna asignada: <strong>${urnaActual}</strong>`;
-                    document.getElementById("step1").classList.add("hidden");
-                    document.getElementById("step2").classList.remove("hidden");
-                    renderVotingUI();
-                    mostrarResultado("✅ Boleta válida. Selecciona tus candidatos (puedes dejar campos vacíos).", "success");
-                } else if (mensaje === "Votante encontrado, solo se puede votar una sola vez") {
-                    mostrarResultado("❌ Este votante ya ha emitido su voto. No se puede votar nuevamente.", "error");
-                } else {
-                    mostrarResultado("⚠️ Respuesta inesperada del servidor.", "error");
-                }
-            } else {
-                mostrarResultado(`❌ Error del servidor: ${error || "Desconocido"}`, "error");
-            }
-        } catch (err) {
-            mostrarResultado(`❌ Error de conexión: ${err.message}`, "error");
-        } finally {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        }
-    });
-
-    // Finalizar votación (envío real)
-    btnFinalizar.addEventListener("click", async () => {
-        if (!urnaActual) urnaActual = Math.floor(Math.random() * 3) + 1;
-
-        // Trazabilidad
-        const cadenaUsuario = `${identificadorHashGlobal} Noack`;
-        const Chain1 = CryptoJS.SHA256(cadenaUsuario).toString();
-        const cadenaParaHash = `${Chain1} urna ${urnaActual}`;
-        const Chain2 = CryptoJS.SHA256(cadenaParaHash).toString();
-        const bd = Math.floor(Math.random() * 3) + 1;
-        const cadenaBaseDatos = `${Chain2} BD ${bd}`;
-        const Chain3 = CryptoJS.SHA256(cadenaBaseDatos).toString();
-
-        // Votos mezclados
-        const nombrePresidente = nombresSeleccionados[0] !== undefined ? nombresSeleccionados[0] : null;
-        const nombreAlcalde = nombresSeleccionados[1] !== undefined ? nombresSeleccionados[1] : null;
-        const nombreDiputado = nombresSeleccionados[2] !== undefined ? nombresSeleccionados[2] : null;
-
-        const mixedPresidente = mezclarFirmaYNombre(identificadorHashGlobal, nombrePresidente, 10);
-        const mixedAlcalde = mezclarFirmaYNombre(identificadorHashGlobal, nombreAlcalde, 10);
-        const mixedDiputado = mezclarFirmaYNombre(identificadorHashGlobal, nombreDiputado, 10);
-
-        const col2 = encryptAES128(mixedPresidente);
-        const col3 = encryptAES128(mixedAlcalde);
-        const col4 = encryptAES128(mixedDiputado);
-
-        const payload = {
-            col1: identificadorHashGlobal,
-            col2, col3, col4,
-            col5: Chain1,
-            col6: Chain2,
-            col7: Chain3
-        };
-
-        const btn = document.getElementById("finalizarBtn");
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<span class="spinner"></span> Registrando voto...';
-        btn.disabled = true;
-
-        try {
-            const { ok, message, error } = await registrarVoto(payload);
-            if (ok) {
-                mostrarResultado("✅ ¡Voto registrado exitosamente! Gracias por participar.", "success");
-                setTimeout(() => {
-                    document.getElementById("step2").classList.add("hidden");
-                    document.getElementById("step1").classList.remove("hidden");
-                    document.getElementById("boletaInput").value = "";
-                    identificadorHashGlobal = "";
-                    selecciones = {};
-                    nombresSeleccionados = {};
-                    urnaActual = null;
-                    ocultarResultado();
-                }, 3000);
-            } else {
-                mostrarResultado(`❌ Error al registrar voto: ${error || "Intente más tarde"}`, "error");
-            }
-        } catch (err) {
-            mostrarResultado(`❌ Error de conexión: ${err.message}`, "error");
-        } finally {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        }
-    });
+    } catch (err) {
+        loginResultDiv.innerHTML = `❌ Error de conexión: ${err.message}`;
+        loginResultDiv.classList.add("show", "error");
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
 });
+
+// --- VERIFICAR VOTANTE (SHA256) ---
+enviarBtn.addEventListener("click", async () => {
+    ocultarResultado();
+    const boletaPlana = boletaInput.value.trim();
+    if (!boletaPlana) {
+        mostrarResultado("❌ Por favor ingresa una boleta.", "error");
+        return;
+    }
+    const textoConstante = " Sistema de votaciones 2026";
+    const concatenado = boletaPlana + textoConstante;
+    const hashSha256 = CryptoJS.SHA256(concatenado).toString();
+    identificadorHashGlobal = hashSha256;
+
+    const originalText = enviarBtn.innerHTML;
+    enviarBtn.innerHTML = '<span class="spinner"></span> Verificando hash...';
+    enviarBtn.disabled = true;
+
+    try {
+        const { ok, mensaje, error } = await verificarVotante(identificadorHashGlobal);
+        if (ok) {
+            if (mensaje === "Votante no encontrado puede votar") {
+                urnaActual = Math.floor(Math.random() * 3) + 1;
+                urnaDisplay.innerHTML = `🎲 Urna asignada: <strong>${urnaActual}</strong>`;
+                step1Div.classList.add("hidden");
+                step2Div.classList.remove("hidden");
+                renderVotingUI();
+                mostrarResultado("✅ Boleta válida. Selecciona tus candidatos.", "success");
+            } else if (mensaje === "Votante encontrado, solo se puede votar una sola vez") {
+                mostrarResultado("❌ Este votante ya ha emitido su voto.", "error");
+            } else {
+                mostrarResultado("⚠️ Respuesta inesperada.", "error");
+            }
+        } else {
+            mostrarResultado(`❌ Error del servidor: ${error || "Desconocido"}`, "error");
+        }
+    } catch (err) {
+        mostrarResultado(`❌ Error de conexión: ${err.message}`, "error");
+    } finally {
+        enviarBtn.innerHTML = originalText;
+        enviarBtn.disabled = false;
+    }
+});
+
+// --- REGISTRAR VOTO (con BD aleatoria) ---
+finalizarBtn.addEventListener("click", async () => {
+    if (!urnaActual) urnaActual = Math.floor(Math.random() * 3) + 1;
+
+    // Trazabilidad (Chain1 incluye al supervisor)
+    const cadenaUsuario = `${identificadorHashGlobal} ${supervisorActual}`;
+    const Chain1 = CryptoJS.SHA256(cadenaUsuario).toString();
+    const cadenaParaHash = `${Chain1} urna ${urnaActual}`;
+    const Chain2 = CryptoJS.SHA256(cadenaParaHash).toString();
+    const bd = Math.floor(Math.random() * 3) + 1; // 1,2,3 aleatorio
+    const cadenaBaseDatos = `${Chain2} BD ${bd}`;
+    const Chain3 = CryptoJS.SHA256(cadenaBaseDatos).toString();
+
+    const nombrePresidente = nombresSeleccionados[0] ?? null;
+    const nombreAlcalde = nombresSeleccionados[1] ?? null;
+    const nombreDiputado = nombresSeleccionados[2] ?? null;
+
+    const mixedPresidente = mezclarFirmaYNombre(identificadorHashGlobal, nombrePresidente, 10);
+    const mixedAlcalde = mezclarFirmaYNombre(identificadorHashGlobal, nombreAlcalde, 10);
+    const mixedDiputado = mezclarFirmaYNombre(identificadorHashGlobal, nombreDiputado, 10);
+
+    const col2 = encryptAES128(mixedPresidente);
+    const col3 = encryptAES128(mixedAlcalde);
+    const col4 = encryptAES128(mixedDiputado);
+
+    const payload = {
+        col1: identificadorHashGlobal,
+        col2, col3, col4,
+        col5: Chain1,
+        col6: Chain2,
+        col7: Chain3
+    };
+
+    const originalText = finalizarBtn.innerHTML;
+    finalizarBtn.innerHTML = '<span class="spinner"></span> Registrando voto...';
+    finalizarBtn.disabled = true;
+
+    try {
+        const { ok, message, error } = await registrarVoto(payload, bd);
+        if (ok) {
+            mostrarResultado(`✅ ¡Voto registrado exitosamente en la BD ${bd}!`, "success");
+            setTimeout(() => {
+                step2Div.classList.add("hidden");
+                step1Div.classList.remove("hidden");
+                boletaInput.value = "";
+                identificadorHashGlobal = "";
+                selecciones = {};
+                nombresSeleccionados = {};
+                urnaActual = null;
+                ocultarResultado();
+            }, 3000);
+        } else {
+            mostrarResultado(`❌ Error al registrar voto: ${error || "Intente más tarde"}`, "error");
+        }
+    } catch (err) {
+        mostrarResultado(`❌ Error de conexión: ${err.message}`, "error");
+    } finally {
+        finalizarBtn.innerHTML = originalText;
+        finalizarBtn.disabled = false;
+    }
+});
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, m => (m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')));
+}
