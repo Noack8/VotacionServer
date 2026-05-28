@@ -13,17 +13,42 @@ CREATE TABLE tf053213d914b6b87715eb8aaad72a3a7ded38c81 (
 insert into tf053213d914b6b87715eb8aaad72a3a7ded38c81 (a3f2ecdef3c6c3b614e34115a95b25944cfa4198a,a8be3c943b1609fffbfc51aad666d0a04adf83c9d) 
 values ('c5652d9cc6bcf28e0e20210eae5ef9e54ba35717','dfd677c5f3f28f730fd0a0d7c2322c10b6c1f9d5');
 
+================ Las 3 tablas para simular las BD distribuidas ========================
 
-Registro de votaciones                      a7e41e2f119cd9d111c0738f2c71bd336467216b
-Voto 1 Presidente                           90457f37945b8dfb83e1b46c6e7e042e02d91984
-Voto 2 Alcalde                              790d32ac3577c9048b63b8e56391bd0d63f9ecf4
-Voto 3 Diputado                             455ee7b3ef6288a901c9bca7593568c9dd36807a
+Registro de votaciones BD 1                 355583f8873bb5bdb4a48696e87537ab3d71b0c0
+Voto 1 Presidente BD 1                      bdddf16a7792ac32403646df48c9b277a7c3184e
+Voto 2 Alcalde BD 1                         b0e43bad48a8c66eb040ff061f8e16f7b095ed7a
+Voto 3 Diputado BD 1                        13aef377cbf540b6dfa13b7078754a017a31bf09
 
-CREATE TABLE ta7e41e2f119cd9d111c0738f2c71bd336467216b (
-  a90457f37945b8dfb83e1b46c6e7e042e02d91984 TEXT, --Presidente
-  A790D32AC3577C9048B63B8E56391BD0D63F9ECF4 TEXT, --Alcalde
-  A455EE7B3EF6288A901C9BCA7593568C9DD36807A TEXT  --Diputado
+CREATE TABLE t355583f8873bb5bdb4a48696e87537ab3d71b0c0 (
+  abdddf16a7792ac32403646df48c9b277a7c3184e TEXT, --Presidente
+  ab0e43bad48a8c66eb040ff061f8e16f7b095ed7a TEXT, --Alcalde
+  a13aef377cbf540b6dfa13b7078754a017a31bf09 TEXT  --Diputado
 );
+
+Registro de votaciones BD 2                 9a9760062ebbbe4f6956ed94fc49850f90a214ce
+Voto 1 Presidente BD 2                      b9e7a687d4e3aed26d1982400e88538063686486
+Voto 2 Alcalde BD 2                         94d15aa69ecb37d70b39f1f6fbb5a10568cc0cdc
+Voto 3 Diputado BD 2                        9952f9b71875a553bf7a05fcfed40565937b5db4
+
+CREATE TABLE t9a9760062ebbbe4f6956ed94fc49850f90a214ce (
+  ab9e7a687d4e3aed26d1982400e88538063686486 TEXT, --Presidente
+  a94d15aa69ecb37d70b39f1f6fbb5a10568cc0cdc TEXT, --Alcalde
+  a9952f9b71875a553bf7a05fcfed40565937b5db4 TEXT  --Diputado
+);
+
+Registro de votaciones BD 3                 ae9374156b15a1563fb1239d45f8cd04d184f26f
+Voto 1 Presidente BD 3                      86ad94551a0e8edab1a357814cad829d0509b661
+Voto 2 Alcalde BD 3                         343726a05f3559abb9f3484cc3afbd992d06ddf0
+Voto 3 Diputado BD 3                        0191b2477e7c3894201db6e50cac53bb69208f8c
+
+CREATE TABLE tae9374156b15a1563fb1239d45f8cd04d184f26f (
+  a86ad94551a0e8edab1a357814cad829d0509b661 TEXT, --Presidente
+  a343726a05f3559abb9f3484cc3afbd992d06ddf0 TEXT, --Alcalde
+  a0191b2477e7c3894201db6e50cac53bb69208f8c TEXT  --Diputado
+);
+
+========================================================================================
 
 Votante                                     89344c9c1c66bb7d5691d88a4b7309499e0324be
 Firma                                       439145df693732a7d4567e33720a90124508ecdb

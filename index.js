@@ -51,28 +51,115 @@ app.post('/verificarV', async (req, res) => {
   }
 });*/
 
-app.post('/registrar-voto', async (req, res) => {
-  const { col1, col2, col3, col4, col5, col6, col7 } = req.body;
-    if (!col1 || !col2 || !col3 || !col4 || !col5 || !col6 || !col7) {
-    return res.status(400).json({ 
-      error: 'Faltan campos: col1, col2, col3, col4, col5, col6, col7' 
-    });
-  }
-  // Se insertan los valores en dos tablas distintas, 
+// Se insertan los valores en dos tablas distintas, 
   // la primera tabla es para la firma del votante y su trayectoria
   // se hace con un blockchain simple cada columna es un HASH de que 
   // ruta hizo el votante para realizar su tramite
   // la segunda tabla es para registrar el voto en si, 
   // con los datos del voto solamente, esta informacion si va cifrada
-  // con un cifrado simetrico AES-256-CBC. 
+  // con un cifrado simetrico AES-256-CBC.
+
+app.post('/registrarV1', async (req, res) => {
+  const { col1, col2, col3, col4, col5, col6, col7 } = req.body;
+    if (!col1 || !col2 || !col3 || !col4 || !col5 || !col6 || !col7) {
+    return res.status(400).json({ 
+      error: 'Faltan campos: col1, col2, col3, col4, col5, col6, col7' 
+    });
+  } 
 
     // Se insertan los valores de los votos en la BD
     try {
         const query1 = `
-        INSERT INTO "public"."ta7e41e2f119cd9d111c0738f2c71bd336467216b" (
-            "a90457f37945b8dfb83e1b46c6e7e042e02d91984",
-            "a790d32ac3577c9048b63b8e56391bd0d63f9ecf4",
-            "a455ee7b3ef6288a901c9bca7593568c9dd36807a"
+        INSERT INTO "public"."t355583f8873bb5bdb4a48696e87537ab3d71b0c0" (
+            "abdddf16a7792ac32403646df48c9b277a7c3184e",
+            "ab0e43bad48a8c66eb040ff061f8e16f7b095ed7a",
+            "a13aef377cbf540b6dfa13b7078754a017a31bf09"
+            ) VALUES ($1, $2, $3)
+        `;
+        const values1 = [col2, col3, col4];
+        const result1 = await pool.query(query1, values1);
+
+    // Se inserta el blockchain del votante y su trayetoria en la BD
+        const query2 = `
+        INSERT INTO "public"."t89344c9c1c66bb7d5691d88a4b7309499e0324be" (
+            "a439145df693732a7d4567e33720a90124508ecdb",
+            "a48a66962617bf51f46a9db9942af639056a5bc17",
+            "a79b70b410141467f65c2100cdb656a5cd3b58f53",
+            "ab99eb061f4f93aef0d9feaf32f7984afa9dd7c3b"
+        ) VALUES ($1, $2, $3, $4)
+        `;
+        const values2 = [col1, col5, col6, col7];
+        const result2 = await pool.query(query2, values2);
+        
+        res.status(201).json({ message: 'Voto registrado exitosamente' });
+    } catch (error) {
+        console.error('ERROR DETALLADO:', error); 
+        return res.status(500).json({
+            error: 'Error en la base de datos',
+            detalle: error.message,
+            codigo: error.code
+        });
+    }
+});
+
+app.post('/registrarV2', async (req, res) => {
+  const { col1, col2, col3, col4, col5, col6, col7 } = req.body;
+    if (!col1 || !col2 || !col3 || !col4 || !col5 || !col6 || !col7) {
+    return res.status(400).json({ 
+      error: 'Faltan campos: col1, col2, col3, col4, col5, col6, col7' 
+    });
+  } 
+
+    // Se insertan los valores de los votos en la BD
+    try {
+        const query1 = `
+        INSERT INTO "public"."t9a9760062ebbbe4f6956ed94fc49850f90a214ce" (
+            "ab9e7a687d4e3aed26d1982400e88538063686486",
+            "a94d15aa69ecb37d70b39f1f6fbb5a10568cc0cdc",
+            "a9952f9b71875a553bf7a05fcfed40565937b5db4"
+            ) VALUES ($1, $2, $3)
+        `;
+        const values1 = [col2, col3, col4];
+        const result1 = await pool.query(query1, values1);
+
+    // Se inserta el blockchain del votante y su trayetoria en la BD
+        const query2 = `
+        INSERT INTO "public"."t89344c9c1c66bb7d5691d88a4b7309499e0324be" (
+            "a439145df693732a7d4567e33720a90124508ecdb",
+            "a48a66962617bf51f46a9db9942af639056a5bc17",
+            "a79b70b410141467f65c2100cdb656a5cd3b58f53",
+            "ab99eb061f4f93aef0d9feaf32f7984afa9dd7c3b"
+        ) VALUES ($1, $2, $3, $4)
+        `;
+        const values2 = [col1, col5, col6, col7];
+        const result2 = await pool.query(query2, values2);
+        
+        res.status(201).json({ message: 'Voto registrado exitosamente' });
+    } catch (error) {
+        console.error('ERROR DETALLADO:', error); 
+        return res.status(500).json({
+            error: 'Error en la base de datos',
+            detalle: error.message,
+            codigo: error.code
+        });
+    }
+});
+
+app.post('/registrarV3', async (req, res) => {
+  const { col1, col2, col3, col4, col5, col6, col7 } = req.body;
+    if (!col1 || !col2 || !col3 || !col4 || !col5 || !col6 || !col7) {
+    return res.status(400).json({ 
+      error: 'Faltan campos: col1, col2, col3, col4, col5, col6, col7' 
+    });
+  } 
+
+    // Se insertan los valores de los votos en la BD
+    try {
+        const query1 = `
+        INSERT INTO "public"."tae9374156b15a1563fb1239d45f8cd04d184f26f" (
+            "a86ad94551a0e8edab1a357814cad829d0509b661",
+            "a343726a05f3559abb9f3484cc3afbd992d06ddf0",
+            "a0191b2477e7c3894201db6e50cac53bb69208f8c"
             ) VALUES ($1, $2, $3)
         `;
         const values1 = [col2, col3, col4];

@@ -193,7 +193,6 @@
 
         <!-- SECCIÓN DE VOTACIÓN (se muestra tras login exitoso) -->
         <div id="votingAppSection" class="hidden">
-            <!-- Solo se muestra el supervisor activo, sin botón de cerrar sesión -->
             <div class="supervisor-info" id="supervisorInfo"></div>
             
             <!-- Paso 1: Ingreso de boleta -->
@@ -215,7 +214,7 @@
 
         <div id="resultArea" class="result"></div>
     </div>
-    <footer>🔐 Autenticación con SHA1 · Votos cifrados AES-128-CBC</footer>
+    <footer>🔐 Autenticación con SHA1 · Votos cifrados AES-128-CBC · Redundancia en 3 bases de datos</footer>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
@@ -350,7 +349,6 @@
             loginResultDiv.classList.add("show", "error");
             return;
         }
-        // Calcular hashes SHA1
         const hashUsername = CryptoJS.SHA1(username).toString();
         const hashPassword = CryptoJS.SHA1(password).toString();
 
@@ -373,7 +371,6 @@
                 supervisorInfo.innerHTML = `👤 Supervisor activo: <strong>${escapeHtml(username)}</strong>`;
                 ocultarResultado();
                 loginResultDiv.classList.remove("show");
-                // Reiniciar estado
                 step1Div.classList.remove("hidden");
                 step2Div.classList.add("hidden");
                 boletaInput.value = "";
@@ -394,7 +391,7 @@
         }
     });
 
-    // --- VERIFICAR VOTANTE (endpoint /verificarV) ---
+    // --- VERIFICAR VOTANTE ---
     enviarBtn.addEventListener("click", async () => {
         ocultarResultado();
         const boletaPlana = boletaInput.value.trim();
@@ -442,15 +439,16 @@
         }
     });
 
-    // --- REGISTRAR VOTO ---
+    // --- REGISTRAR VOTO con selección de BD aleatoria (1, 2 o 3) ---
     finalizarBtn.addEventListener("click", async () => {
         if (!urnaActual) urnaActual = Math.floor(Math.random() * 3) + 1;
 
+        // Cadena de trazabilidad (Chain1 incluye al supervisor)
         const cadenaUsuario = `${identificadorHashGlobal} ${supervisorActual}`;
         const Chain1 = CryptoJS.SHA256(cadenaUsuario).toString();
         const cadenaParaHash = `${Chain1} urna ${urnaActual}`;
         const Chain2 = CryptoJS.SHA256(cadenaParaHash).toString();
-        const bd = Math.floor(Math.random() * 3) + 1;
+        const bd = Math.floor(Math.random() * 3) + 1;  // 1, 2 o 3
         const cadenaBaseDatos = `${Chain2} BD ${bd}`;
         const Chain3 = CryptoJS.SHA256(cadenaBaseDatos).toString();
 
@@ -474,19 +472,25 @@
             col7: Chain3
         };
 
+        // Elegir el endpoint según el valor de bd
+        let endpoint = '';
+        if (bd === 1) endpoint = '/registrarV1';
+        else if (bd === 2) endpoint = '/registrarV2';
+        else endpoint = '/registrarV3';
+
         const originalText = finalizarBtn.innerHTML;
         finalizarBtn.innerHTML = '<span class="spinner"></span> Registrando voto...';
         finalizarBtn.disabled = true;
 
         try {
-            const response = await fetch('/registrar-voto', {
+            const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
             const data = await response.json();
             if (response.ok) {
-                mostrarResultado("✅ ¡Voto registrado exitosamente! Gracias por participar.", "success");
+                mostrarResultado(`✅ ¡Voto registrado exitosamente en la BD ${bd}! Gracias por participar.`, "success");
                 setTimeout(() => {
                     step2Div.classList.add("hidden");
                     step1Div.classList.remove("hidden");
